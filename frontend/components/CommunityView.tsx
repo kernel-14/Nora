@@ -30,7 +30,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({ posts, onAddPost }
         </div>
 
         {/* Feed */}
-        <div className="flex flex-col w-full max-w-lg mx-auto">
+        <div className="flex flex-col w-full max-w-md mx-auto">
           {posts.map((post, index) => (
             <CommunityCard key={post.id} post={post} index={index} />
           ))}

@@ -447,14 +447,57 @@ async def get_records():
 
 @app.get("/api/moods")
 async def get_moods():
-    """Get all moods."""
+    """Get all moods from both moods.json and records.json."""
     try:
         config = get_config()
         storage_service = StorageService(str(config.data_dir))
-        moods = storage_service._read_json_file(storage_service.moods_file)
-        return {"moods": moods}
+        
+        # 1. 读取 moods.json
+        moods_from_file = storage_service._read_json_file(storage_service.moods_file)
+        logger.info(f"Loaded {len(moods_from_file)} moods from moods.json")
+        
+        # 2. 从 records.json 中提取心情数据
+        records = storage_service._read_json_file(storage_service.records_file)
+        moods_from_records = []
+        
+        for record in records:
+            # 检查 parsed_data 中是否有 mood
+            parsed_data = record.get("parsed_data", {})
+            mood_data = parsed_data.get("mood")
+            
+            if mood_data and mood_data.get("type"):
+                # 构造心情对象
+                mood_obj = {
+                    "record_id": record["record_id"],
+                    "timestamp": record["timestamp"],
+                    "type": mood_data.get("type"),
+                    "intensity": mood_data.get("intensity", 5),
+                    "keywords": mood_data.get("keywords", [])
+                }
+                moods_from_records.append(mood_obj)
+        
+        logger.info(f"Extracted {len(moods_from_records)} moods from records.json")
+        
+        # 3. 合并两个来源的心情数据（去重，优先使用 records 中的数据）
+        mood_dict = {}
+        
+        # 先添加 moods.json 中的数据
+        for mood in moods_from_file:
+            mood_dict[mood["record_id"]] = mood
+        
+        # 再添加/覆盖 records.json 中的数据
+        for mood in moods_from_records:
+            mood_dict[mood["record_id"]] = mood
+        
+        # 转换为列表并按时间排序（最新的在前）
+        all_moods = list(mood_dict.values())
+        all_moods.sort(key=lambda x: x["timestamp"], reverse=True)
+        
+        logger.info(f"Total unique moods: {len(all_moods)}")
+        
+        return {"moods": all_moods}
     except Exception as e:
-        logger.error(f"Failed to get moods: {e}")
+        logger.error(f"Failed to get moods: {e}", exc_info=True)
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}

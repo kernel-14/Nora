@@ -46,7 +46,7 @@ export const InspirationView: React.FC<InspirationViewProps> = ({
 
       {/* Scrollable List */}
       <div className="relative z-10 flex-1 overflow-y-auto no-scrollbar scroll-smooth px-6 pt-2 pb-32">
-        <div className="w-full max-w-lg mx-auto flex flex-col gap-2">
+        <div className="w-full max-w-md mx-auto flex flex-col gap-2">
            {items.map((item, index) => (
              <InspirationCard key={item.id} item={item} index={index} />
            ))}

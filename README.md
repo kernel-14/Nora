@@ -9,6 +9,7 @@
 - 🤖 **AI 语义解析** - 智能提取情绪、灵感和待办事项
 - 💬 **AI 对话陪伴（RAG）** - 基于历史记录的个性化对话
 - 🖼️ **AI 形象定制** - 生成专属的治愈系猫咪角色（720 种组合）
+- 🫧 **物理引擎心情池** - 基于 Matter.js 的动态气泡可视化，真实物理碰撞
 - 💾 **本地存储** - 数据和图片安全保存在本地
 
 ## 🚀 快速开始
@@ -62,7 +63,7 @@ VITE_API_URL=http://localhost:8000
 
 ### 3. 启动服务
 
-**方式 1：一键启动（推荐）**
+#### 方式 1：一键启动（推荐）
 
 同时启动前后端：
 ```bash
@@ -73,42 +74,37 @@ start_dev.bat
 .\start_dev.ps1
 ```
 
-**方式 2：分别启动**
+#### 方式 2：分别启动
 
-终端 1 - 启动后端：
+**终端 1 - 启动后端：**
 ```bash
 # Windows CMD
 启动后端.bat
 
 # PowerShell
 .\启动后端.ps1
+
+# 或手动启动（必须在项目根目录）
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-终端 2 - 启动前端：
+**终端 2 - 启动前端：**
 ```bash
 # Windows CMD
 启动前端.bat
 
 # PowerShell
 .\启动前端.ps1
-```
 
-**方式 3：手动启动**
-
-终端 1 - 启动后端：
-```bash
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-终端 2 - 启动前端：
-```bash
+# 或手动启动
 cd frontend
 npm run dev
 ```
 
-> **注意：** 必须在项目根目录运行后端命令，不能在 `app/` 目录内。如遇到 `ModuleNotFoundError`，请运行 `python 诊断环境.py` 检查环境。
-> 
-> **启动脚本说明：** 详见 [启动脚本说明.md](启动脚本说明.md)
+> **⚠️ 重要提示：**
+> - 后端必须在项目根目录运行，不能在 `app/` 目录内
+> - 如遇到 `ModuleNotFoundError`，请运行 `python 诊断环境.py` 检查环境
+> - 启动脚本会自动检查端口占用并处理
 
 ### 4. 访问应用
 
@@ -167,7 +163,38 @@ npm run dev
 | 输出 | 结构化数据 | 自然语言 |
 | 保存 | 自动保存 | 不保存对话 |
 
-### 3. 智能语义解析
+### 3. 物理引擎心情气泡池 🫧
+
+基于 Matter.js 物理引擎的动态心情可视化界面，将情绪记录转化为可交互的彩色气泡。
+
+**核心特性：**
+- 🎨 **数据驱动** - 从 `moods.json` 和 `records.json` 读取，只显示最近 7 天
+- 📏 **大小映射** - 气泡大小由情绪强度（1-10）决定
+- 🎨 **颜色映射** - 不同心情类型对应不同颜色
+  - 喜悦/开心: 🟠 橙色/粉色系
+  - 兴奋: 🟡 黄色系
+  - 平静/放松: 🔵 蓝色/绿色系
+  - 焦虑/紧张: 🟣 紫色系
+  - 悲伤/疲惫: ⚪ 灰色/淡紫系
+- 💫 **真实物理** - 气泡相互碰撞产生真实反弹效果
+- 🖱️ **拖拽交互** - 可以拖动气泡，感受物理引擎
+- 👆 **点击详情** - 点击气泡查看心情类型、强度、关键词、时间
+- 🌊 **布朗运动** - 轻微随机扰动，模拟自然漂浮
+- ✨ **毛玻璃效果** - 半透明渐变、光晕、高光，治愈系视觉
+
+**技术实现：**
+- 使用 Matter.js 物理引擎
+- 自定义渲染（文字、光晕、高光）
+- 响应式容器适配
+- 优化的性能（60 FPS）
+
+**快速体验：**
+```bash
+# 打开独立测试页面（无需启动后端）
+frontend/test-physics-mood.html
+```
+
+### 4. 智能语义解析
 
 输入文本或语音，AI 自动提取：
 - **情绪** - 类型、强度（1-10）、关键词
@@ -184,7 +211,7 @@ npm run dev
 - 待办: 整理项目文档 (明天)
 ```
 
-### 4. AI 形象定制
+### 5. AI 形象定制
 
 生成专属的治愈系猫咪 AI 陪伴形象：
 
@@ -204,7 +231,7 @@ npm run dev
 ## 📁 项目结构
 
 ```
-voice-text-processor/
+Inspiration-Record-APP/
 ├── app/                    # 后端代码
 │   ├── main.py            # FastAPI 应用入口
 │   ├── semantic_parser.py # AI 语义解析
@@ -216,6 +243,7 @@ voice-text-processor/
 ├── frontend/              # 前端代码
 │   ├── components/        # React 组件
 │   │   ├── HomeInput.tsx         # 首页输入组件
+│   │   ├── SimpleMoodBubble.tsx  # 物理气泡组件
 │   │   ├── AIEntity.tsx          # AI 形象
 │   │   ├── ChatDialog.tsx        # 对话界面
 │   │   └── ...
@@ -229,6 +257,9 @@ voice-text-processor/
 ├── generated_images/      # AI 生成的角色图片
 ├── docs/                  # 详细文档
 ├── tests/                # 测试代码
+├── 启动后端.bat          # Windows 后端启动脚本
+├── 启动前端.bat          # Windows 前端启动脚本
+├── start_dev.bat         # 一键启动脚本
 └── README.md
 ```
 
@@ -241,7 +272,7 @@ voice-text-processor/
 | POST | `/api/process` | 处理文本/语音输入（首页记录） |
 | POST | `/api/chat` | 与 AI 助手对话（RAG 增强） |
 | GET | `/api/records` | 获取所有记录 |
-| GET | `/api/moods` | 获取情绪数据 |
+| GET | `/api/moods` | 获取情绪数据（合并 moods.json 和 records.json） |
 | GET | `/api/inspirations` | 获取灵感 |
 | GET | `/api/todos` | 获取待办事项 |
 | PATCH | `/api/todos/{id}` | 更新待办状态 |
@@ -279,6 +310,7 @@ curl -X POST http://localhost:8000/api/chat \
 - **Vite** - 构建工具
 - **Tailwind CSS** - 样式框架
 - **Lucide React** - 图标库
+- **Matter.js** - 物理引擎（心情气泡池）
 
 ### 数据存储
 - **JSON 文件** - 本地持久化
@@ -288,7 +320,7 @@ curl -X POST http://localhost:8000/api/chat \
 
 ### 常见问题
 
-#### Q: 后端启动失败 - ModuleNotFoundError: No module named 'app'
+#### Q1: 后端启动失败 - ModuleNotFoundError: No module named 'app'
 
 **原因：** 在错误的目录运行命令
 
@@ -298,39 +330,97 @@ curl -X POST http://localhost:8000/api/chat \
 3. 或手动运行：`python -m uvicorn app.main:app --reload`
 4. 运行诊断：`python 诊断环境.py`
 
-详见：[docs/后端启动问题排查.md](docs/后端启动问题排查.md)
+**诊断命令：**
+```bash
+# 检查当前目录
+pwd  # 或 cd (Windows)
 
-#### Q: 语音录制不工作
+# 应该看到 app/ 文件夹
+ls  # 或 dir (Windows)
+
+# 检查 Python 路径
+python 诊断环境.py
+```
+
+#### Q2: 端口被占用
+
+**解决方法：**
+```bash
+# 查找占用端口的进程
+# Windows
+netstat -ano | findstr :8000
+netstat -ano | findstr :5173
+
+# 结束进程
+taskkill /PID <进程ID> /F
+
+# 或使用启动脚本（自动处理）
+启动后端.bat
+启动前端.bat
+```
+
+#### Q3: 语音录制不工作
 
 **解决方法：**
 1. 检查浏览器是否支持（Chrome/Edge 推荐）
 2. 允许麦克风权限
 3. 使用 HTTPS 或 localhost
+4. 检查浏览器控制台错误
 
 **注意：** 浏览器录音默认使用 webm 格式，前端会自动转换为 wav 格式（约 1 秒）。
 
-详见：[docs/语音录制问题排查.md](docs/语音录制问题排查.md)
+**支持的浏览器：**
+- ✅ Chrome 60+
+- ✅ Edge 79+
+- ✅ Firefox 55+
+- ❌ Safari（部分支持）
+- ❌ IE（不支持）
 
-#### Q: 前端无法连接后端
+#### Q4: 前端无法连接后端
 
 **解决方法：**
 1. 检查后端是否启动: `curl http://localhost:8000/health`
 2. 检查 CORS 配置
-3. 检查 `VITE_API_URL` 环境变量
+3. 检查 `frontend/.env.local` 中的 `VITE_API_URL`
+4. 清除浏览器缓存
 
-#### Q: AI 对话没有使用历史记录
+#### Q5: AI 对话没有使用历史记录
 
 **解决方法：**
 1. 确保已经添加了一些记录
 2. 问更具体的问题，如"我昨天做了什么？"
 3. 检查 `data/records.json` 是否有数据
+4. 查看后端日志确认 RAG 是否工作
 
-#### Q: AI 形象生成失败
+#### Q6: AI 形象生成失败
 
 **解决方法：**
 1. 检查 `MINIMAX_API_KEY` 是否配置
 2. 检查 API 配额是否充足
 3. 查看详细错误信息
+4. 检查网络连接
+
+#### Q7: 心情气泡池不显示
+
+**解决方法：**
+1. 检查是否有心情数据（最近 7 天）
+2. 打开浏览器控制台查看错误
+3. 确认 Matter.js 已加载
+4. 刷新页面（Ctrl+Shift+R）
+
+**调试步骤：**
+```bash
+# 1. 检查数据
+curl http://localhost:8000/api/moods
+
+# 2. 打开独立测试页面
+frontend/test-physics-mood.html
+
+# 3. 查看控制台日志
+# 应该看到：
+# 🎨 初始化气泡池: { width: 1440, height: 780, count: 9 }
+# ✅ 气泡池启动成功
+```
 
 ### 查看日志
 
@@ -340,6 +430,9 @@ tail -f logs/app.log
 
 # 或在 Windows 中
 Get-Content logs/app.log -Wait
+
+# 或直接查看文件
+notepad logs/app.log
 ```
 
 ## 🧪 测试
@@ -349,6 +442,9 @@ Get-Content logs/app.log -Wait
 ```bash
 # 后端测试
 pytest
+
+# 带覆盖率
+pytest --cov=app --cov-report=html
 
 # 环境诊断
 python 诊断环境.py
@@ -360,6 +456,8 @@ python test_home_input.py
 ### 测试页面
 
 - **音频录制测试**: 打开 `test_audio_recording.html`
+- **物理气泡测试**: 打开 `frontend/test-physics-mood.html`
+- **Matter.js 测试**: 打开 `测试Matter基础渲染.html`
 - **API 测试**: 访问 http://localhost:8000/docs
 
 ## ⚙️ 配置说明
@@ -375,15 +473,36 @@ python test_home_input.py
 | `LOG_LEVEL` | ❌ | `INFO` | 日志级别 |
 | `HOST` | ❌ | `0.0.0.0` | 服务器地址 |
 | `PORT` | ❌ | `8000` | 服务器端口 |
-| `MAX_AUDIO_SIZE` | ❌ | `10485760` | 最大音频文件大小 |
+| `MAX_AUDIO_SIZE` | ❌ | `10485760` | 最大音频文件大小（10MB） |
+
+### 页面宽度统一
+
+所有页面使用统一的最大宽度 `max-w-md` (448px)，确保一致的视觉体验：
+- ✅ 首页
+- ✅ 记录页面
+- ✅ 社区页面
+- ✅ 我的页面
+- ✅ 心情页面
+- ✅ 灵感页面
+- ✅ 待办页面
 
 ## 📚 详细文档
 
+### 核心文档
 - **[功能架构图](docs/功能架构图.md)** - 系统架构和数据流向
+- **[功能总结](docs/FEATURE_SUMMARY.md)** - 所有功能的详细说明
+- **[PRD.md](PRD.md)** - 产品需求文档
+
+### 问题排查
 - **[后端启动问题排查](docs/后端启动问题排查.md)** - 启动问题解决方案
 - **[语音录制问题排查](docs/语音录制问题排查.md)** - 音频格式和录制问题
-- **[API 文档](http://localhost:8000/docs)** - 在线 API 文档（需启动后端）
-- **[PRD.md](PRD.md)** - 产品需求文档
+
+### 特性文档
+- **[心情气泡池功能说明](docs/心情气泡池功能说明.md)** - 物理引擎气泡池详细说明
+- **[心情气泡池快速开始](docs/心情气泡池快速开始.md)** - 快速上手指南
+
+### API 文档
+- **[在线 API 文档](http://localhost:8000/docs)** - Swagger UI（需启动后端）
 
 ## 🎯 使用指南
 
@@ -392,7 +511,7 @@ python test_home_input.py
 1. **启动应用**
    ```bash
    启动后端.bat  # 或 .\启动后端.ps1
-   cd frontend && npm run dev
+   启动前端.bat  # 或 cd frontend && npm run dev
    ```
 
 2. **首页快速记录**
@@ -422,6 +541,7 @@ python test_home_input.py
 ```bash
 cd frontend
 npm run build
+# 构建产物在 frontend/dist/
 ```
 
 **后端：**
@@ -445,17 +565,44 @@ gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
 - TypeScript: ESLint
 - 提交信息: Conventional Commits
 
+### 开发技巧
+
+**后端开发：**
+```bash
+# 自动重载
+python -m uvicorn app.main:app --reload
+
+# 查看日志
+tail -f logs/app.log
+```
+
+**前端开发：**
+```bash
+# 开发服务器
+npm run dev
+
+# 类型检查
+npm run type-check
+
+# 构建
+npm run build
+```
+
 ## 🔐 安全机制
 
 ### API Key 保护
 - 存储在 `.env` 文件
-- 不提交到版本控制
+- 不提交到版本控制（`.gitignore`）
 - 日志中自动过滤
 
 ### 输入验证
 - 前端基本格式验证
 - 后端 Pydantic 模型验证
 - 文件大小和格式限制
+
+### CORS 配置
+- 开发环境允许 localhost
+- 生产环境需配置白名单
 
 ## 🎯 未来计划
 
@@ -464,8 +611,10 @@ gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
 - [ ] 向量数据库（更好的 RAG）
 - [ ] 语音合成（AI 语音回复）
 - [ ] 多语言支持
-- [ ] 主题切换
+- [ ] 主题切换（深色模式）
 - [ ] 数据导出和备份
+- [ ] 移动端 App
+- [ ] 云端同步
 
 ## 🤝 贡献指南
 
@@ -473,10 +622,15 @@ gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
 
 ### 开发流程
 1. Fork 项目
-2. 创建特性分支
-3. 提交更改
-4. 推送到分支
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 创建 Pull Request
+
+### 报告问题
+- 使用 Issue 模板
+- 提供详细的复现步骤
+- 附上错误日志和截图
 
 ## 📄 许可证
 

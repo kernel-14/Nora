@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>物理引擎心情气泡测试</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #f5f3ff 0%, #fce7f3 100%);
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      text-align: center;
+      color: #6b21a8;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      text-align: center;
+      color: #9333ea;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    
+    .canvas-container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      position: relative;
+    }
+    
+    canvas {
+      display: block;
+      cursor: pointer;
+    }
+    
+    .info {
+      margin-top: 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    .info h3 {
+      margin-top: 0;
+      color: #6b21a8;
+    }
+    
+    .info ul {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+    
+    .info li {
+      margin: 8px 0;
+      color: #64748b;
+    }
+    
+    .mood-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .mood-item {
+      padding: 12px;
+      background: linear-gradient(135deg, #f3e8ff 0%, #fce7f3 100%);
+      border-radius: 8px;
+      font-size: 12px;
+      text-align: center;
+    }
+    
+    .mood-type {
+      font-weight: 600;
+      color: #6b21a8;
+      margin-bottom: 4px;
+    }
+    
+    .mood-intensity {
+      color: #9333ea;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🫧 物理引擎心情气泡池</h1>
+    <p class="subtitle">基于 Matter.js 的动态气泡交互演示</p>
+    
+    <div class="canvas-container">
+      <canvas id="moodCanvas"></canvas>
+    </div>
+    
+    <div class="info">
+      <h3>✨ 功能特性</h3>
+      <ul>
+        <li>🎨 <strong>颜色映射</strong>：不同心情类型对应不同颜色（喜悦-橙色、焦虑-紫色、平静-蓝色等）</li>
+        <li>📏 <strong>大小映射</strong>：气泡大小由情绪强度（1-10）决定</li>
+        <li>💫 <strong>物理碰撞</strong>：气泡之间真实的物理反弹效果</li>
+        <li>🖱️ <strong>拖拽交互</strong>：可以拖动气泡，感受物理引擎</li>
+        <li>👆 <strong>点击查看</strong>：点击气泡查看详细信息</li>
+        <li>🌊 <strong>布朗运动</strong>：轻微的随机扰动，模拟自然漂浮</li>
+        <li>✨ <strong>光晕效果</strong>：半透明渐变，毛玻璃质感</li>
+      </ul>
+      
+      <h3>📊 当前心情数据</h3>
+      <div class="mood-list" id="moodList"></div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.20.0/matter.min.js"></script>
+  <script>
+    // 模拟心情数据
+    const mockMoods = [
+      { id: '1', type: '喜悦', intensity: 9, timestamp: new Date().toISOString(), keywords: ['开心', '满足'] },
+      { id: '2', type: '焦虑', intensity: 7, timestamp: new Date().toISOString(), keywords: ['压力', '担心'] },
+      { id: '3', type: '平静', intensity: 6, timestamp: new Date().toISOString(), keywords: ['放松', '安宁'] },
+      { id: '4', type: '兴奋', intensity: 8, timestamp: new Date().toISOString(), keywords: ['激动', '期待'] },
+      { id: '5', type: '悲伤', intensity: 5, timestamp: new Date().toISOString(), keywords: ['难过', '失落'] },
+      { id: '6', type: '疲惫', intensity: 4, timestamp: new Date().toISOString(), keywords: ['累', '困'] },
+      { id: '7', type: '开心', intensity: 8, timestamp: new Date().toISOString(), keywords: ['愉快', '轻松'] },
+      { id: '8', type: '放松', intensity: 7, timestamp: new Date().toISOString(), keywords: ['舒适', '自在'] },
+    ];
+
+    // 颜色映射
+    const getMoodColor = (type) => {
+      const colorMap = {
+        '喜悦': { fill: '#FED7AA', stroke: '#FB923C', glow: 'rgba(251, 146, 60, 0.4)' },
+        '开心': { fill: '#FECACA', stroke: '#FB7185', glow: 'rgba(251, 113, 133, 0.4)' },
+        '兴奋': { fill: '#FEF08A', stroke: '#FACC15', glow: 'rgba(250, 204, 21, 0.4)' },
+        '平静': { fill: '#BFDBFE', stroke: '#60A5FA', glow: 'rgba(96, 165, 250, 0.4)' },
+        '放松': { fill: '#D9F99D', stroke: '#84CC16', glow: 'rgba(132, 204, 22, 0.4)' },
+        '焦虑': { fill: '#DDD6FE', stroke: '#A78BFA', glow: 'rgba(167, 139, 250, 0.4)' },
+        '悲伤': { fill: '#CBD5E1', stroke: '#64748B', glow: 'rgba(100, 116, 139, 0.4)' },
+        '疲惫': { fill: '#E0E7FF', stroke: '#818CF8', glow: 'rgba(129, 140, 248, 0.4)' },
+      };
+      return colorMap[type] || { fill: '#E2E8F0', stroke: '#94A3B8', glow: 'rgba(148, 163, 184, 0.4)' };
+    };
+
+    // 初始化画布
+    const canvas = document.getElementById('moodCanvas');
+    const width = 800;
+    const height = 600;
+    canvas.width = width;
+    canvas.height = height;
+
+    // 创建物理引擎
+    const engine = Matter.Engine.create({
+      gravity: { x: 0, y: 0.05, scale: 0.001 }
+    });
+
+    const render = Matter.Render.create({
+      canvas: canvas,
+      engine: engine,
+      options: {
+        width: width,
+        height: height,
+        wireframes: false,
+        background: 'transparent'
+      }
+    });
+
+    // 创建边界
+    const wallThickness = 50;
+    const walls = [
+      Matter.Bodies.rectangle(width / 2, -wallThickness / 2, width, wallThickness, { isStatic: true, render: { visible: false } }),
+      Matter.Bodies.rectangle(width / 2, height + wallThickness / 2, width, wallThickness, { isStatic: true, render: { visible: false } }),
+      Matter.Bodies.rectangle(-wallThickness / 2, height / 2, wallThickness, height, { isStatic: true, render: { visible: false } }),
+      Matter.Bodies.rectangle(width + wallThickness / 2, height / 2, wallThickness, height, { isStatic: true, render: { visible: false } })
+    ];
+    Matter.World.add(engine.world, walls);
+
+    // 创建气泡
+    const bodies = mockMoods.map((mood, index) => {
+      const radius = 25 + (mood.intensity / 10) * 35;
+      const angle = (index / mockMoods.length) * Math.PI * 2;
+      const distance = Math.min(width, height) * 0.2;
+      const x = width / 2 + Math.cos(angle) * distance;
+      const y = height / 2 + Math.sin(angle) * distance;
+      const colors = getMoodColor(mood.type);
+
+      const body = Matter.Bodies.circle(x, y, radius, {
+        restitution: 0.6,
+        friction: 0.01,
+        frictionAir: 0.02,
+        density: 0.001,
+        render: {
+          fillStyle: colors.fill,
+          strokeStyle: colors.stroke,
+          lineWidth: 2
+        },
+        label: mood.id
+      });
+
+      Matter.Body.setVelocity(body, {
+        x: (Math.random() - 0.5) * 2,
+        y: (Math.random() - 0.5) * 2
+      });
+
+      return { body, mood };
+    });
+
+    Matter.World.add(engine.world, bodies.map(b => b.body));
+
+    // 鼠标交互
+    const mouse = Matter.Mouse.create(canvas);
+    const mouseConstraint = Matter.MouseConstraint.create(engine, {
+      mouse: mouse,
+      constraint: {
+        stiffness: 0.2,
+        render: { visible: false }
+      }
+    });
+    Matter.World.add(engine.world, mouseConstraint);
+
+    // 点击事件
+    Matter.Events.on(mouseConstraint, 'mousedown', (event) => {
+      const mousePosition = event.mouse.position;
+      const clickedBody = Matter.Query.point(bodies.map(b => b.body), mousePosition)[0];
+      
+      if (clickedBody) {
+        const moodData = bodies.find(b => b.body === clickedBody);
+        if (moodData) {
+          alert(`心情: ${moodData.mood.type}\n强度: ${moodData.mood.intensity}/10\n关键词: ${moodData.mood.keywords.join(', ')}`);
+        }
+      }
+    });
+
+    // 自定义渲染
+    Matter.Events.on(render, 'afterRender', () => {
+      const context = render.context;
+      
+      bodies.forEach(({ body, mood }) => {
+        const { position } = body;
+        const radius = body.circleRadius;
+        const colors = getMoodColor(mood.type);
+
+        // 光晕
+        context.save();
+        context.globalAlpha = 0.3;
+        const gradient = context.createRadialGradient(
+          position.x, position.y, radius * 0.5,
+          position.x, position.y, radius * 1.5
+        );
+        gradient.addColorStop(0, colors.glow);
+        gradient.addColorStop(1, 'transparent');
+        context.fillStyle = gradient;
+        context.beginPath();
+        context.arc(position.x, position.y, radius * 1.5, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+
+        // 高光
+        context.save();
+        context.globalAlpha = 0.5;
+        context.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        context.beginPath();
+        context.arc(
+          position.x - radius * 0.3,
+          position.y - radius * 0.3,
+          radius * 0.25,
+          0,
+          Math.PI * 2
+        );
+        context.fill();
+        context.restore();
+
+        // 文字
+        context.save();
+        context.fillStyle = '#334155';
+        context.font = `${Math.max(12, radius * 0.35)}px sans-serif`;
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillText(mood.type, position.x, position.y);
+        context.restore();
+      });
+    });
+
+    // 布朗运动
+    setInterval(() => {
+      bodies.forEach(({ body }) => {
+        Matter.Body.applyForce(body, body.position, {
+          x: (Math.random() - 0.5) * 0.0001,
+          y: (Math.random() - 0.5) * 0.0001
+        });
+      });
+    }, 100);
+
+    // 启动
+    Matter.Runner.run(engine);
+    Matter.Render.run(render);
+
+    // 显示心情列表
+    const moodList = document.getElementById('moodList');
+    mockMoods.forEach(mood => {
+      const div = document.createElement('div');
+      div.className = 'mood-item';
+      div.innerHTML = `
+        <div class="mood-type">${mood.type}</div>
+        <div class="mood-intensity">强度: ${mood.intensity}/10</div>
+      `;
+      moodList.appendChild(div);
+    });
+  </script>
+</body>
+</html>
