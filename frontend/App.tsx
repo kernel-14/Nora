@@ -792,8 +792,8 @@ export default function App() {
           <>
             <TopActions onActionClick={handleActionClick} />
             
-            <div className="flex-1 flex flex-col items-center justify-center w-full relative -mt-10">
-               <div className="absolute top-10 opacity-60 text-sm font-light tracking-widest text-slate-500 animate-pulse delay-700">
+            <div className="flex-1 flex flex-col items-center justify-center w-full relative pt-24 pb-12">
+               <div className="absolute top-28 opacity-60 text-sm font-light tracking-widest text-slate-500 animate-pulse delay-700">
                  I'm here with you
                </div>
                
