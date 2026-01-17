@@ -15,19 +15,11 @@ jobs:
       - name: Push to hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-      run: |
+        run: |
           git config --global user.email "bot@github.com"
           git config --global user.name "GitHub Action"
-          
-          # 1. 从 Git 的跟踪记录中强制删除该文件夹及其内容
           git rm -r --cached generated_images || echo "Already removed from index"
-          
-          # 2. 物理删除文件夹
           rm -rf generated_images
-          
-          # 3. 提交更改
           git add .
           git commit -m "clean up git history and remove binaries" || echo "No changes to commit"
-          
-          # 4. 强制推送到 Hugging Face
           git push --force https://kernel14:$HF_TOKEN@huggingface.co/spaces/kernel14/Nora main
