@@ -17,6 +17,10 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # 这里的 [你的HF用户名] 和 [你的Space名称] 需要替换掉
-          # 例如：git push --force https://kernel-14:$HF_TOKEN@huggingface.co/spaces/kernel-14/Nora main
-          git push --force https://kernel14:$HF_TOKEN@huggingface.co/spaces/kernel14/Nora main
+        # 临时删除图片文件夹再推送
+        rm -rf generated_images
+        git config --global user.email "bot@github.com"
+        git config --global user.name "GitHub Action"
+        git add .
+        git commit -m "temp remove binaries for sync" || echo "No changes to commit"
+        git push --force https://kernel-14:$HF_TOKEN@huggingface.co/spaces/kernel-14/Nora main
