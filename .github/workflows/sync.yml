@@ -16,10 +16,23 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
+          # 1. 配置身份
           git config --global user.email "bot@github.com"
           git config --global user.name "GitHub Action"
-          git rm -r --cached generated_images || echo "Already removed from index"
+          
+          # 2. 彻底移除二进制文件及其索引
           rm -rf generated_images
+          git rm -r --cached generated_images || echo "Already removed"
+          
+          # 3. 创建一个全新的、没有历史记录的临时分支
+          git checkout --orphan temp-branch
+          
+          # 4. 只添加当前的代码文件
           git add .
-          git commit -m "clean up git history and remove binaries" || echo "No changes to commit"
-          git push --force https://kernel14:$HF_TOKEN@huggingface.co/spaces/kernel14/Nora main
+          git commit -m "Deploy clean version of Nora"
+          
+          # 5. 强制推送到 Hugging Face 的 main 分支
+          # 注意：这会覆盖 HF 上的所有历史，非常适合解决当前死锁
+          git push --force https://kernel14:$HF_TOKEN@huggingface.co/spaces/kernel14/Nora temp-branch:main
+
+      
