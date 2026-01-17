@@ -1,0 +1,22 @@
+name: Sync to Hugging Face hub
+on:
+  push:
+    branches: [main]
+  # 允许手动触发
+  workflow_dispatch:
+
+jobs:
+  sync-to-hub:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          lfs: true
+      - name: Push to hub
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          # 这里的 [你的HF用户名] 和 [你的Space名称] 需要替换掉
+          # 例如：git push --force https://kernel-14:$HF_TOKEN@huggingface.co/spaces/kernel-14/Nora main
+          git push --force https://kernel14:$HF_TOKEN@huggingface.co/spaces/kernel14/Nora main
