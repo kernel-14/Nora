@@ -11,7 +11,7 @@ export interface MoodData {
 
 interface SimpleMoodBubbleProps {
   moods: MoodData[];
-  onMoodClick: (mood: MoodData) => void;
+  onMoodClick: (mood: MoodData | null) => void;
 }
 
 const COLORS: Record<string, string> = {
@@ -30,6 +30,7 @@ const COLORS: Record<string, string> = {
 export const SimpleMoodBubble: React.FC<SimpleMoodBubbleProps> = ({ moods, onMoodClick }) => {
   const sceneRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<Matter.Engine | null>(null);
+  const selectedBubbleRef = useRef<Matter.Body | null>(null);
 
   useEffect(() => {
     if (!sceneRef.current || moods.length === 0) return;
@@ -99,21 +100,59 @@ export const SimpleMoodBubble: React.FC<SimpleMoodBubbleProps> = ({ moods, onMoo
     });
     Matter.World.add(engine.world, mouseConstraint);
 
-    // 点击事件
+    // 左键点击事件
     Matter.Events.on(mouseConstraint, 'mousedown', (event) => {
-      const clicked = Matter.Query.point(bubbles.map(b => b.body), event.mouse.position)[0];
-      if (clicked) {
-        const bubble = bubbles.find(b => b.body === clicked);
-        if (bubble) onMoodClick(bubble.mood);
+      // 只处理左键点击（button 0）
+      if (event.mouse.button === 0) {
+        const clicked = Matter.Query.point(bubbles.map(b => b.body), event.mouse.position)[0];
+        if (clicked) {
+          selectedBubbleRef.current = clicked;
+          const bubble = bubbles.find(b => b.body === clicked);
+          if (bubble) onMoodClick(bubble.mood);
+        }
       }
     });
+
+    // 右键取消选择
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault(); // 阻止默认右键菜单
+      
+      if (selectedBubbleRef.current) {
+        // 取消选择效果（可以添加视觉反馈）
+        selectedBubbleRef.current = null;
+        console.log('✨ 取消选择气泡');
+        
+        // 关闭详情弹窗（通过传递 null）
+        onMoodClick(null as any);
+      }
+    };
+
+    // 添加右键事件监听
+    if (render.canvas) {
+      render.canvas.addEventListener('contextmenu', handleContextMenu);
+    }
 
     // 自定义渲染文字
     Matter.Events.on(render, 'afterRender', () => {
       const ctx = render.context;
       bubbles.forEach(({ body, mood }) => {
+        // 如果是选中的气泡，添加高亮效果
+        const isSelected = selectedBubbleRef.current === body;
+        
+        if (isSelected) {
+          // 绘制选中高亮圈
+          ctx.save();
+          ctx.strokeStyle = 'rgba(147, 51, 234, 0.6)'; // 紫色高亮
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.arc(body.position.x, body.position.y, (body.circleRadius || 30) + 8, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+        }
+        
+        // 绘制文字
         ctx.save();
-        ctx.fillStyle = '#334155';
+        ctx.fillStyle = isSelected ? '#7c3aed' : '#334155'; // 选中时文字变紫色
         ctx.font = `${Math.max(12, (body.circleRadius || 30) * 0.35)}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -131,6 +170,9 @@ export const SimpleMoodBubble: React.FC<SimpleMoodBubbleProps> = ({ moods, onMoo
 
     // 清理
     return () => {
+      if (render.canvas) {
+        render.canvas.removeEventListener('contextmenu', handleContextMenu);
+      }
       Matter.Render.stop(render);
       Matter.Runner.stop(runner);
       Matter.World.clear(engine.world, false);

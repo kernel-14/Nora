@@ -76,8 +76,13 @@ export const MoodView: React.FC<MoodViewProps> = ({
     loadMoodsData();
   }, [items]);
 
-  const handleMoodClick = useCallback((mood: MoodData) => {
-    setSelectedMood(mood as MoodDetailData);
+  const handleMoodClick = useCallback((mood: MoodData | null) => {
+    if (mood === null) {
+      // 右键取消选择
+      setSelectedMood(null);
+    } else {
+      setSelectedMood(mood as MoodDetailData);
+    }
   }, []);
 
   const formatDate = (timestamp: string) => {
@@ -134,7 +139,7 @@ export const MoodView: React.FC<MoodViewProps> = ({
           {/* 使用说明 */}
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-center">
             <p className="text-xs text-slate-400 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full">
-              💡 点击气泡查看详情 · 拖动气泡互动
+              💡 左键查看详情 · 右键取消 · 拖动互动
             </p>
           </div>
         </div>
