@@ -757,6 +757,15 @@ export default function App() {
     }
   };
 
+  const handleTabChange = (tab: Tab) => {
+    // 如果有打开的全屏页面，先关闭它
+    if (activeActionView) {
+      setActiveActionView(null);
+    }
+    // 然后切换标签
+    setCurrentTab(tab);
+  };
+
   const isHome = currentTab === Tab.HOME;
 
   return (
@@ -839,8 +848,8 @@ export default function App() {
           />
         )}
         
-        {/* Bottom Navigation */}
-        <BottomNav currentTab={currentTab} onTabChange={setCurrentTab} />
+        {/* Bottom Navigation - 始终显示，z-index 最高 */}
+        <BottomNav currentTab={currentTab} onTabChange={handleTabChange} />
       </main>
 
       {/* Character Customization Dialog */}
