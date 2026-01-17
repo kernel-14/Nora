@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 测试页面</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .result {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #667eea;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .error {
+            border-left-color: #e74c3c;
+            color: #e74c3c;
+        }
+        .success {
+            border-left-color: #2ecc71;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .status.online {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 API 集成测试</h1>
+        
+        <!-- Health Check -->
+        <div class="section">
+            <h2>服务状态 <span id="status" class="status offline">离线</span></h2>
+            <button onclick="checkHealth()">检查健康状态</button>
+            <div id="health-result"></div>
+        </div>
+
+        <!-- Text Processing -->
+        <div class="section">
+            <h2>📝 文本处理</h2>
+            <textarea id="text-input" rows="4" placeholder="输入文本，例如：今天心情很好，想到了一个新点子，明天要记得买书"></textarea>
+            <button onclick="processText()">处理文本</button>
+            <div id="text-result"></div>
+        </div>
+
+        <!-- Get Records -->
+        <div class="section">
+            <h2>📚 获取记录</h2>
+            <button onclick="getRecords()">获取所有记录</button>
+            <button onclick="getMoods()">获取情绪</button>
+            <button onclick="getInspirations()">获取灵感</button>
+            <button onclick="getTodos()">获取待办</button>
+            <div id="data-result"></div>
+        </div>
+
+        <!-- User Config -->
+        <div class="section">
+            <h2>⚙️ 用户配置</h2>
+            <button onclick="getUserConfig()">获取用户配置</button>
+            <div id="config-result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+
+        async function checkHealth() {
+            const statusEl = document.getElementById('status');
+            const resultEl = document.getElementById('health-result');
+            
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                
+                statusEl.textContent = '在线';
+                statusEl.className = 'status online';
+                resultEl.innerHTML = `<div class="result success">${JSON.stringify(data, null, 2)}</div>`;
+            } catch (error) {
+                statusEl.textContent = '离线';
+                statusEl.className = 'status offline';
+                resultEl.innerHTML = `<div class="result error">错误: ${error.message}</div>`;
+            }
+        }
+
+        async function processText() {
+            const text = document.getElementById('text-input').value;
+            const resultEl = document.getElementById('text-result');
+            
+            if (!text.trim()) {
+                resultEl.innerHTML = `<div class="result error">请输入文本</div>`;
+                return;
+            }
+
+            resultEl.innerHTML = `<div class="result">处理中...</div>`;
+
+            try {
+                const formData = new FormData();
+                formData.append('text', text);
+
+                const response = await fetch(`${API_URL}/api/process`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultEl.innerHTML = `<div class="result success">${JSON.stringify(data, null, 2)}</div>`;
+                } else {
+                    resultEl.innerHTML = `<div class="result error">${JSON.stringify(data, null, 2)}</div>`;
+                }
+            } catch (error) {
+                resultEl.innerHTML = `<div class="result error">错误: ${error.message}</div>`;
+            }
+        }
+
+        async function getRecords() {
+            await fetchData('/api/records', 'data-result');
+        }
+
+        async function getMoods() {
+            await fetchData('/api/moods', 'data-result');
+        }
+
+        async function getInspirations() {
+            await fetchData('/api/inspirations', 'data-result');
+        }
+
+        async function getTodos() {
+            await fetchData('/api/todos', 'data-result');
+        }
+
+        async function getUserConfig() {
+            await fetchData('/api/user/config', 'config-result');
+        }
+
+        async function fetchData(endpoint, resultId) {
+            const resultEl = document.getElementById(resultId);
+            resultEl.innerHTML = `<div class="result">加载中...</div>`;
+
+            try {
+                const response = await fetch(`${API_URL}${endpoint}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultEl.innerHTML = `<div class="result success">${JSON.stringify(data, null, 2)}</div>`;
+                } else {
+                    resultEl.innerHTML = `<div class="result error">${JSON.stringify(data, null, 2)}</div>`;
+                }
+            } catch (error) {
+                resultEl.innerHTML = `<div class="result error">错误: ${error.message}</div>`;
+            }
+        }
+
+        // Check health on load
+        window.addEventListener('load', checkHealth);
+    </script>
+</body>
+</html>
