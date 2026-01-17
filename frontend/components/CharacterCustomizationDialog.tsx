@@ -153,8 +153,10 @@ export const CharacterCustomizationDialog: React.FC<CharacterCustomizationDialog
           errorMessage = 'API 密钥无效，请检查 MINIMAX_API_KEY 配置';
         } else if (error.message.includes('配额不足')) {
           errorMessage = 'API 配额不足，请充值或等待配额恢复';
-        } else if (error.message.includes('timeout')) {
-          errorMessage = '请求超时，请检查网络连接后重试';
+        } else if (error.message.includes('timeout') || error.message.includes('超时')) {
+          errorMessage = '请求超时，图像生成时间较长（约60-90秒），请耐心等待或稍后重试';
+        } else if (error.message.includes('Failed to fetch') || error.message.includes('fetch')) {
+          errorMessage = '网络连接失败，请检查：\n1. 后端服务是否运行\n2. 网络连接是否正常\n3. 防火墙是否允许访问';
         } else {
           errorMessage = error.message;
         }

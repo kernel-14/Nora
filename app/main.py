@@ -85,7 +85,12 @@ app = FastAPI(
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],  # Vite default port
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://172.18.16.245:5173",  # 允许从电脑 IP 访问
+        "*"  # 开发环境允许所有来源（生产环境应该限制）
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -141,7 +146,7 @@ class ValidationError(Exception):
 
 
 # Supported audio formats
-SUPPORTED_AUDIO_FORMATS = {".mp3", ".wav", ".m4a"}
+SUPPORTED_AUDIO_FORMATS = {".mp3", ".wav", ".m4a", ".webm"}
 
 
 @app.post("/api/process", response_model=ProcessResponse)
@@ -522,14 +527,61 @@ async def update_todo(todo_id: str, status: str = Form(...)):
 
 @app.post("/api/chat")
 async def chat_with_ai(text: str = Form(...)):
-    """Chat with AI assistant."""
+    """Chat with AI assistant using RAG with records.json as knowledge base.
+    
+    This endpoint provides conversational AI that has context about the user's
+    previous records, moods, inspirations, and todos.
+    """
     try:
         config = get_config()
-        parser_service = SemanticParserService(config.zhipu_api_key)
+        storage_service = StorageService(str(config.data_dir))
+        
+        # Load user's records as RAG knowledge base
+        records = storage_service._read_json_file(storage_service.records_file)
+        
+        # Build context from recent records (last 10)
+        recent_records = records[-10:] if len(records) > 10 else records
+        context_parts = []
+        
+        for record in recent_records:
+            original_text = record.get('original_text', '')
+            timestamp = record.get('timestamp', '')
+            
+            # Add parsed data context
+            parsed_data = record.get('parsed_data', {})
+            mood = parsed_data.get('mood')
+            inspirations = parsed_data.get('inspirations', [])
+            todos = parsed_data.get('todos', [])
+            
+            context_entry = f"[{timestamp}] 用户说: {original_text}"
+            
+            if mood:
+                context_entry += f"\n情绪: {mood.get('type')} (强度: {mood.get('intensity')})"
+            
+            if inspirations:
+                ideas = [insp.get('core_idea') for insp in inspirations]
+                context_entry += f"\n灵感: {', '.join(ideas)}"
+            
+            if todos:
+                tasks = [todo.get('task') for todo in todos]
+                context_entry += f"\n待办: {', '.join(tasks)}"
+            
+            context_parts.append(context_entry)
+        
+        # Build system prompt with context
+        context_text = "\n\n".join(context_parts) if context_parts else "暂无历史记录"
+        
+        system_prompt = f"""你是一个温柔、善解人意的AI陪伴助手。你的名字叫小喵。
+你会用温暖、治愈的语气和用户聊天，给予他们情感支持和陪伴。
+回复要简短、自然、有温度。
+
+你可以参考用户的历史记录来提供更贴心的回复：
+
+{context_text}
+
+请基于这些背景信息，用温暖、理解的语气回复用户。如果用户提到之前的事情，你可以自然地关联起来。"""
         
         try:
-            # 使用语义解析服务的底层 API 进行对话
-            # 这里我们直接调用智谱 AI 进行对话
             import httpx
             
             async with httpx.AsyncClient() as client:
@@ -544,7 +596,7 @@ async def chat_with_ai(text: str = Form(...)):
                         "messages": [
                             {
                                 "role": "system",
-                                "content": "你是一个温柔、善解人意的AI陪伴助手。你的名字叫小喵。你会用温暖、治愈的语气和用户聊天，给予他们情感支持和陪伴。回复要简短、自然、有温度。"
+                                "content": system_prompt
                             },
                             {
                                 "role": "user",
@@ -560,13 +612,15 @@ async def chat_with_ai(text: str = Form(...)):
                 if response.status_code == 200:
                     result = response.json()
                     ai_response = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+                    logger.info(f"AI chat successful with RAG context")
                     return {"response": ai_response}
                 else:
                     logger.error(f"AI chat failed: {response.status_code} {response.text}")
                     return {"response": "抱歉，我现在有点累了，稍后再聊好吗？"}
         
-        finally:
-            await parser_service.close()
+        except Exception as e:
+            logger.error(f"AI API call error: {e}")
+            return {"response": "抱歉，我现在有点累了，稍后再聊好吗？"}
             
     except Exception as e:
         logger.error(f"Chat error: {e}")

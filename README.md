@@ -5,9 +5,9 @@
 ## 🌟 核心特性
 
 - 🎨 **精美 WebUI** - React + TypeScript 构建的现代化界面
+- 🎤 **首页快速记录** - 语音/文字快速记录，自动分类保存
 - 🤖 **AI 语义解析** - 智能提取情绪、灵感和待办事项
-- 💬 **AI 对话陪伴** - 随时与温暖的 AI 助手聊天
-- 🎤 **语音输入** - 支持语音转文字（ASR）
+- 💬 **AI 对话陪伴（RAG）** - 基于历史记录的个性化对话
 - 🖼️ **AI 形象定制** - 生成专属的治愈系猫咪角色（720 种组合）
 - 💾 **本地存储** - 数据和图片安全保存在本地
 
@@ -62,11 +62,42 @@ VITE_API_URL=http://localhost:8000
 
 ### 3. 启动服务
 
-**方式 1：手动启动（推荐）**
+**方式 1：一键启动（推荐）**
+
+同时启动前后端：
+```bash
+# Windows CMD
+start_dev.bat
+
+# PowerShell
+.\start_dev.ps1
+```
+
+**方式 2：分别启动**
 
 终端 1 - 启动后端：
 ```bash
-python -m uvicorn app.main:app --reload
+# Windows CMD
+启动后端.bat
+
+# PowerShell
+.\启动后端.ps1
+```
+
+终端 2 - 启动前端：
+```bash
+# Windows CMD
+启动前端.bat
+
+# PowerShell
+.\启动前端.ps1
+```
+
+**方式 3：手动启动**
+
+终端 1 - 启动后端：
+```bash
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 终端 2 - 启动前端：
@@ -75,17 +106,9 @@ cd frontend
 npm run dev
 ```
 
-**方式 2：使用启动脚本**
-
-Windows CMD:
-```bash
-start_dev.bat
-```
-
-PowerShell:
-```bash
-.\start_dev.ps1
-```
+> **注意：** 必须在项目根目录运行后端命令，不能在 `app/` 目录内。如遇到 `ModuleNotFoundError`，请运行 `python 诊断环境.py` 检查环境。
+> 
+> **启动脚本说明：** 详见 [启动脚本说明.md](启动脚本说明.md)
 
 ### 4. 访问应用
 
@@ -95,7 +118,56 @@ PowerShell:
 
 ## 🎯 核心功能
 
-### 1. 智能语义解析
+### 1. 首页快速记录
+
+在首页通过语音或文字快速记录想法，系统自动分析并分类保存。
+
+**两种输入方式：**
+- 🎤 **语音录制** - 点击麦克风按钮，说出你的想法（自动转换 webm → wav）
+- ⌨️ **文字输入** - 在输入框中直接打字
+
+**工作流程：**
+```
+用户输入 → /api/process → AI 分析 → 保存到 records.json → 自动拆分到：
+  - moods.json (情绪)
+  - inspirations.json (灵感)
+  - todos.json (待办)
+```
+
+**特点：**
+- ✨ 一键记录，无需多步操作
+- 🚀 实时处理和反馈（3-5 秒）
+- 💾 自动保存和分类
+- 🎯 支持所有现代浏览器
+
+### 2. AI 对话陪伴（RAG 增强）
+
+与智能形象交流时，AI 会基于你的历史记录提供个性化回复。
+
+**对话特点：**
+- 💬 每条消息调用 `/api/chat` 接口
+- 🧠 使用 RAG（检索增强生成）技术
+- 📚 基于 `records.json` 作为知识库（最近 10 条）
+- 💝 提供个性化、有温度的回复
+
+**使用场景：**
+- 💭 倾诉心情，获得情感支持
+- 🤔 讨论想法，获得建议
+- 📝 回顾过往，获得洞察
+- 🌟 日常陪伴，温暖治愈
+
+**功能对比：**
+
+| 功能 | 首页记录 | AI 对话 |
+|------|---------|---------|
+| 目的 | 快速记录想法 | 智能对话陪伴 |
+| API | `/api/process` | `/api/chat` |
+| 调用 | 一次性处理 | 每条消息 |
+| 知识库 | 不使用 | 使用 RAG |
+| 输出 | 结构化数据 | 自然语言 |
+| 保存 | 自动保存 | 不保存对话 |
+
+### 3. 智能语义解析
 
 输入文本或语音，AI 自动提取：
 - **情绪** - 类型、强度（1-10）、关键词
@@ -112,15 +184,7 @@ PowerShell:
 - 待办: 整理项目文档 (明天)
 ```
 
-### 2. AI 对话陪伴
-
-每个页面都可以点击对话按钮，与 AI 助手聊天：
-- 💬 温暖、治愈的对话风格
-- 🎯 情感支持和建议
-- ⚡ 实时响应
-- 📱 流畅的用户体验
-
-### 3. AI 形象定制
+### 4. AI 形象定制
 
 生成专属的治愈系猫咪 AI 陪伴形象：
 
@@ -137,26 +201,6 @@ PowerShell:
 4. 等待 30-60 秒
 5. 查看新生成的 AI 形象
 
-**图片存储：**
-- 自动保存到 `generated_images/` 目录
-- 文件名格式：`character_颜色_性格_时间戳.jpeg`
-- 启动时自动加载最新图片
-- 通过 `http://localhost:8000/generated_images/` 访问
-
-### 4. 统一页面头部
-
-所有页面都有一致的头部设计：
-- ⬅️ **返回按钮** - 返回主页
-- 🐱 **角色形象** - 显示 AI 头像和在线状态
-- 📝 **页面标题** - 当前页面名称
-- 💬 **对话按钮** - 打开对话界面
-
-### 5. 数据可视化
-
-- **心情气泡图** - 情绪以气泡形式展示，可点击查看详情
-- **灵感卡片** - 精美的卡片式展示，支持添加（文本+语音）
-- **待办列表** - 清晰的任务列表，显示日期和地点
-
 ## 📁 项目结构
 
 ```
@@ -171,29 +215,20 @@ voice-text-processor/
 │   └── models.py          # 数据模型
 ├── frontend/              # 前端代码
 │   ├── components/        # React 组件
+│   │   ├── HomeInput.tsx         # 首页输入组件
 │   │   ├── AIEntity.tsx          # AI 形象
-│   │   ├── PageHeader.tsx        # 页面头部
 │   │   ├── ChatDialog.tsx        # 对话界面
-│   │   ├── CharacterCustomizationDialog.tsx  # 形象定制
-│   │   ├── MoodView.tsx          # 心情视图
-│   │   ├── InspirationView.tsx   # 灵感视图
-│   │   ├── TodoView.tsx          # 待办视图
 │   │   └── ...
 │   ├── services/          # API 服务层
-│   │   └── api.ts        # API 调用封装
-│   ├── utils/            # 工具函数
-│   │   └── dataTransform.ts  # 数据转换
-│   ├── App.tsx           # 主应用
-│   └── types.ts          # 类型定义
+│   └── App.tsx           # 主应用
 ├── data/                  # 数据存储
 │   ├── records.json      # 完整记录
 │   ├── moods.json        # 情绪数据
 │   ├── inspirations.json # 灵感数据
-│   ├── todos.json        # 待办数据
-│   └── user_config.json  # 用户配置
+│   └── todos.json        # 待办数据
 ├── generated_images/      # AI 生成的角色图片
+├── docs/                  # 详细文档
 ├── tests/                # 测试代码
-├── .env                  # 环境变量配置
 └── README.md
 ```
 
@@ -203,8 +238,8 @@ voice-text-processor/
 
 | 方法 | 端点 | 功能 |
 |------|------|------|
-| POST | `/api/process` | 处理文本/语音输入 |
-| POST | `/api/chat` | 与 AI 助手对话 |
+| POST | `/api/process` | 处理文本/语音输入（首页记录） |
+| POST | `/api/chat` | 与 AI 助手对话（RAG 增强） |
 | GET | `/api/records` | 获取所有记录 |
 | GET | `/api/moods` | 获取情绪数据 |
 | GET | `/api/inspirations` | 获取灵感 |
@@ -212,50 +247,21 @@ voice-text-processor/
 | PATCH | `/api/todos/{id}` | 更新待办状态 |
 | GET | `/api/user/config` | 获取用户配置 |
 | POST | `/api/character/generate` | 生成角色形象 |
-| POST | `/api/character/preferences` | 更新角色偏好 |
 | GET | `/health` | 健康检查 |
 
 ### API 示例
 
-#### 处理文本输入
+#### 处理文本输入（首页记录）
 ```bash
 curl -X POST http://localhost:8000/api/process \
   -F "text=今天心情很好，想到了一个新点子，明天要记得买书"
 ```
 
-#### 与 AI 对话
+#### 与 AI 对话（RAG）
 ```bash
 curl -X POST http://localhost:8000/api/chat \
-  -F "text=你好呀"
+  -F "text=我最近在做什么？"
 ```
-
-#### 生成角色形象
-```bash
-curl -X POST http://localhost:8000/api/character/generate \
-  -F "color=温暖粉" \
-  -F "personality=温柔" \
-  -F "appearance=无配饰" \
-  -F "role=陪伴式朋友"
-```
-
-## 🧪 测试
-
-### 运行测试
-
-```bash
-# 后端测试
-pytest
-
-# 验证项目状态
-python 验证项目状态.py
-
-# 测试本地图片加载
-python 测试本地图片加载.py
-```
-
-### 手动测试
-
-访问测试页面：http://localhost:5173/test-api.html
 
 ## 🛠️ 技术栈
 
@@ -282,47 +288,49 @@ python 测试本地图片加载.py
 
 ### 常见问题
 
+#### Q: 后端启动失败 - ModuleNotFoundError: No module named 'app'
+
+**原因：** 在错误的目录运行命令
+
+**解决方法：**
+1. 确保在项目根目录（不是 `app/` 目录内）
+2. 使用启动脚本：`启动后端.bat` 或 `.\启动后端.ps1`
+3. 或手动运行：`python -m uvicorn app.main:app --reload`
+4. 运行诊断：`python 诊断环境.py`
+
+详见：[docs/后端启动问题排查.md](docs/后端启动问题排查.md)
+
+#### Q: 语音录制不工作
+
+**解决方法：**
+1. 检查浏览器是否支持（Chrome/Edge 推荐）
+2. 允许麦克风权限
+3. 使用 HTTPS 或 localhost
+
+**注意：** 浏览器录音默认使用 webm 格式，前端会自动转换为 wav 格式（约 1 秒）。
+
+详见：[docs/语音录制问题排查.md](docs/语音录制问题排查.md)
+
 #### Q: 前端无法连接后端
-**A**: 检查：
-1. 后端是否启动: `curl http://localhost:8000/health`
-2. CORS 配置是否正确
-3. `VITE_API_URL` 环境变量是否正确
 
-#### Q: 语音识别不工作
-**A**: 检查：
-1. 浏览器是否支持 MediaRecorder API
-2. 是否允许麦克风权限
-3. `ZHIPU_API_KEY` 是否配置正确
+**解决方法：**
+1. 检查后端是否启动: `curl http://localhost:8000/health`
+2. 检查 CORS 配置
+3. 检查 `VITE_API_URL` 环境变量
 
-#### Q: 对话功能无响应
-**A**: 检查：
-1. 后端日志: `tail -f logs/app.log`
-2. 浏览器控制台是否有错误
-3. 网络请求是否成功
+#### Q: AI 对话没有使用历史记录
+
+**解决方法：**
+1. 确保已经添加了一些记录
+2. 问更具体的问题，如"我昨天做了什么？"
+3. 检查 `data/records.json` 是否有数据
 
 #### Q: AI 形象生成失败
-**A**: 检查：
-1. `MINIMAX_API_KEY` 是否配置
-2. API 配额是否充足
-3. 网络连接是否正常
-4. 查看详细错误信息
 
-#### Q: 图片不显示
-**A**: 检查：
-1. `generated_images/` 目录是否存在
-2. 图片文件是否存在
-3. 静态文件服务是否启动
-4. 访问 `http://localhost:8000/generated_images/文件名.jpeg`
-
-#### Q: 端口被占用
-**A**: 更改端口：
-```bash
-# 后端
-python -m uvicorn app.main:app --reload --port 8001
-
-# 前端
-npm run dev -- --port 5174
-```
+**解决方法：**
+1. 检查 `MINIMAX_API_KEY` 是否配置
+2. 检查 API 配额是否充足
+3. 查看详细错误信息
 
 ### 查看日志
 
@@ -333,6 +341,26 @@ tail -f logs/app.log
 # 或在 Windows 中
 Get-Content logs/app.log -Wait
 ```
+
+## 🧪 测试
+
+### 运行测试
+
+```bash
+# 后端测试
+pytest
+
+# 环境诊断
+python 诊断环境.py
+
+# 功能测试
+python test_home_input.py
+```
+
+### 测试页面
+
+- **音频录制测试**: 打开 `test_audio_recording.html`
+- **API 测试**: 访问 http://localhost:8000/docs
 
 ## ⚙️ 配置说明
 
@@ -349,68 +377,42 @@ Get-Content logs/app.log -Wait
 | `PORT` | ❌ | `8000` | 服务器端口 |
 | `MAX_AUDIO_SIZE` | ❌ | `10485760` | 最大音频文件大小 |
 
-## 📚 文档
+## 📚 详细文档
 
-- **PRD.md** - 产品需求文档
-- **启动.txt** - 详细启动说明
-- **API 文档** - http://localhost:8000/docs
+- **[功能架构图](docs/功能架构图.md)** - 系统架构和数据流向
+- **[后端启动问题排查](docs/后端启动问题排查.md)** - 启动问题解决方案
+- **[语音录制问题排查](docs/语音录制问题排查.md)** - 音频格式和录制问题
+- **[API 文档](http://localhost:8000/docs)** - 在线 API 文档（需启动后端）
+- **[PRD.md](PRD.md)** - 产品需求文档
 
 ## 🎯 使用指南
 
 ### 基本使用流程
 
 1. **启动应用**
-   - 启动后端和前端服务
-   - 访问 http://localhost:5173
+   ```bash
+   启动后端.bat  # 或 .\启动后端.ps1
+   cd frontend && npm run dev
+   ```
 
-2. **记录心情**
-   - 点击"心情"按钮
-   - 查看情绪气泡图
-   - 点击气泡查看详情
-   - 点击对话按钮与 AI 聊天
+2. **首页快速记录**
+   - 点击麦克风录音或输入文字
+   - AI 自动分析并保存
+   - 查看"记录成功"提示
 
-3. **捕捉灵感**
-   - 点击"灵感"按钮
-   - 浏览灵感卡片
-   - 点击 ✨ 按钮添加新灵感
-   - 支持文本输入或语音录制
+3. **查看分类数据**
+   - 点击"心情"查看情绪气泡图
+   - 点击"灵感"浏览灵感卡片
+   - 点击"待办"管理任务列表
 
-4. **管理待办**
-   - 点击"待办"按钮
-   - 查看待办列表（显示日期和地点）
-   - 完成任务打勾
+4. **与 AI 对话**
+   - 任意页面点击对话按钮
+   - AI 基于历史记录提供个性化回复
 
 5. **定制 AI 形象**
    - 点击主页右下角 ✨ 按钮
    - 选择颜色、性格、外观、角色
-   - 点击"生成形象"
-   - 等待生成完成
-
-6. **与 AI 对话**
-   - 任意页面点击对话按钮
-   - 输入消息
-   - 按 Enter 发送
-   - 查看 AI 回复
-
-## 🎨 UI 特点
-
-### 视觉设计
-- 柔和的紫粉渐变色调
-- 毛玻璃效果（backdrop-blur）
-- 圆润的卡片和按钮
-- 流畅的动画过渡
-
-### 交互体验
-- 统一的页面头部
-- 可点击的情绪气泡
-- 实时的 AI 对话
-- 友好的错误提示
-- 加载状态反馈
-
-### 响应式设计
-- 适配不同屏幕尺寸
-- 移动端友好
-- 触摸优化
+   - 生成专属形象
 
 ## 🚀 部署
 
@@ -421,8 +423,6 @@ Get-Content logs/app.log -Wait
 cd frontend
 npm run build
 ```
-
-构建产物在 `frontend/dist/`
 
 **后端：**
 ```bash
@@ -435,37 +435,15 @@ gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
 
 ### 添加新功能
 
-1. **后端 API**
-   - 在 `app/main.py` 添加新端点
-   - 更新 API 文档
-
-2. **前端组件**
-   - 在 `frontend/components/` 创建新组件
-   - 在 `App.tsx` 中集成
-
-3. **数据模型**
-   - 在 `app/models.py` 定义数据结构
-   - 更新存储逻辑
+1. **后端 API** - 在 `app/main.py` 添加新端点
+2. **前端组件** - 在 `frontend/components/` 创建新组件
+3. **数据模型** - 在 `app/models.py` 定义数据结构
 
 ### 代码规范
 
 - Python: PEP 8
 - TypeScript: ESLint
 - 提交信息: Conventional Commits
-
-## 📈 性能优化
-
-### 前端优化
-- 组件懒加载
-- 数据缓存
-- 乐观更新
-- 图片懒加载
-
-### 后端优化
-- 异步处理
-- 连接池复用
-- 响应压缩
-- 静态文件缓存
 
 ## 🔐 安全机制
 
@@ -479,34 +457,15 @@ gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
 - 后端 Pydantic 模型验证
 - 文件大小和格式限制
 
-### CORS 配置
-- 仅允许特定域名
-- 开发环境: localhost
-- 生产环境: 配置实际域名
-
 ## 🎯 未来计划
 
-### 功能增强
 - [ ] WebSocket 实时推送
-- [ ] 图片上传和展示
-- [ ] 社区功能实现
-- [ ] 用户认证和授权
-- [ ] 数据导出和备份
+- [ ] 多轮对话历史
+- [ ] 向量数据库（更好的 RAG）
+- [ ] 语音合成（AI 语音回复）
 - [ ] 多语言支持
 - [ ] 主题切换
-- [ ] 形象历史记录
-
-### 性能优化
-- [ ] 前端代码分割
-- [ ] API 响应缓存
-- [ ] 虚拟滚动列表
-- [ ] Service Worker
-
-### 部署
-- [ ] Docker 容器化
-- [ ] CI/CD 流程
-- [ ] 生产环境配置
-- [ ] 监控和日志
+- [ ] 数据导出和备份
 
 ## 🤝 贡献指南
 

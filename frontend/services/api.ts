@@ -265,17 +265,36 @@ class APIService {
     formData.append('appearance', preferences.appearance);
     formData.append('role', preferences.role);
 
-    const response = await fetch(`${this.baseUrl}/api/character/generate`, {
-      method: 'POST',
-      body: formData,
-    });
+    // 创建一个 AbortController 用于超时控制
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000); // 120 秒超时
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || error.error || 'Failed to generate character');
+    try {
+      const response = await fetch(`${this.baseUrl}/api/character/generate`, {
+        method: 'POST',
+        body: formData,
+        signal: controller.signal,
+        // 添加 keepalive 以保持连接
+        keepalive: true,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || error.error || 'Failed to generate character');
+      }
+
+      return response.json();
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+      
+      if (error.name === 'AbortError') {
+        throw new Error('请求超时，图像生成时间较长，请稍后重试');
+      }
+      
+      throw error;
     }
-
-    return response.json();
   }
 
   /**

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试音频录制</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .info {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .record-btn {
+            background: #ff4757;
+            color: white;
+        }
+        .stop-btn {
+            background: #ffa502;
+            color: white;
+        }
+        .upload-btn {
+            background: #2ed573;
+            color: white;
+        }
+        .status {
+            text-align: center;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        .status.recording {
+            background: rgba(255, 71, 87, 0.3);
+            animation: pulse 1s infinite;
+        }
+        .status.success {
+            background: rgba(46, 213, 115, 0.3);
+        }
+        .status.error {
+            background: rgba(255, 71, 87, 0.5);
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .result {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        audio {
+            width: 100%;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 音频录制测试</h1>
+        
+        <div class="info">
+            <h3>浏览器支持信息：</h3>
+            <div id="browser-info"></div>
+        </div>
+
+        <div class="controls">
+            <button class="record-btn" id="recordBtn" onclick="startRecording()">开始录音</button>
+            <button class="stop-btn" id="stopBtn" onclick="stopRecording()" disabled>停止录音</button>
+            <button class="upload-btn" id="uploadBtn" onclick="uploadAudio()" disabled>上传到后端</button>
+        </div>
+
+        <div id="status"></div>
+
+        <div id="audioPreview"></div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let audioBlob;
+        let mimeType;
+
+        // Check browser support
+        window.onload = function() {
+            const info = document.getElementById('browser-info');
+            const supported = [];
+            
+            if (MediaRecorder.isTypeSupported('audio/wav')) {
+                supported.push('✅ audio/wav');
+            } else {
+                supported.push('❌ audio/wav');
+            }
+            
+            if (MediaRecorder.isTypeSupported('audio/webm')) {
+                supported.push('✅ audio/webm');
+            } else {
+                supported.push('❌ audio/webm');
+            }
+            
+            if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                supported.push('✅ audio/webm;codecs=opus');
+            } else {
+                supported.push('❌ audio/webm;codecs=opus');
+            }
+            
+            if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                supported.push('✅ audio/mp4');
+            } else {
+                supported.push('❌ audio/mp4');
+            }
+            
+            info.innerHTML = supported.join('<br>');
+        };
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                // Try different formats
+                let options = { mimeType: 'audio/webm' };
+                
+                if (MediaRecorder.isTypeSupported('audio/wav')) {
+                    options = { mimeType: 'audio/wav' };
+                } else if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                    options = { mimeType: 'audio/webm;codecs=opus' };
+                }
+                
+                mediaRecorder = new MediaRecorder(stream, options);
+                mimeType = mediaRecorder.mimeType;
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = async () => {
+                    audioBlob = new Blob(audioChunks, { type: mimeType });
+                    
+                    // Show audio preview
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const preview = document.getElementById('audioPreview');
+                    preview.innerHTML = `
+                        <h3>录音预览：</h3>
+                        <p>格式: ${mimeType}</p>
+                        <p>大小: ${(audioBlob.size / 1024).toFixed(2)} KB</p>
+                        <audio controls src="${audioUrl}"></audio>
+                    `;
+                    
+                    document.getElementById('uploadBtn').disabled = false;
+                    showStatus('录音完成！', 'success');
+                    
+                    // Stop all tracks
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                mediaRecorder.start();
+                document.getElementById('recordBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = false;
+                showStatus('正在录音... (格式: ' + mimeType + ')', 'recording');
+            } catch (err) {
+                console.error('Failed to start recording:', err);
+                showStatus('无法访问麦克风: ' + err.message, 'error');
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                document.getElementById('recordBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+            }
+        }
+
+        async function uploadAudio() {
+            if (!audioBlob) {
+                showStatus('没有录音可上传', 'error');
+                return;
+            }
+
+            showStatus('正在上传...', 'recording');
+            
+            try {
+                // Convert webm to wav if needed
+                let fileToUpload;
+                let fileName;
+                
+                if (mimeType.includes('webm')) {
+                    showStatus('正在转换 webm 到 wav...', 'recording');
+                    const wavBlob = await convertWebmToWav(audioBlob);
+                    fileToUpload = new File([wavBlob], 'recording.wav', { type: 'audio/wav' });
+                    fileName = 'recording.wav';
+                } else if (mimeType.includes('wav')) {
+                    fileToUpload = new File([audioBlob], 'recording.wav', { type: 'audio/wav' });
+                    fileName = 'recording.wav';
+                } else {
+                    fileToUpload = new File([audioBlob], 'recording.mp3', { type: 'audio/mpeg' });
+                    fileName = 'recording.mp3';
+                }
+
+                const formData = new FormData();
+                formData.append('audio', fileToUpload);
+
+                const response = await fetch('http://localhost:8000/api/process', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showStatus('上传成功！', 'success');
+                    displayResult(result);
+                } else {
+                    const error = await response.json();
+                    showStatus('上传失败: ' + (error.error || response.statusText), 'error');
+                }
+            } catch (err) {
+                console.error('Upload failed:', err);
+                showStatus('上传失败: ' + err.message, 'error');
+            }
+        }
+
+        async function convertWebmToWav(webmBlob) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const arrayBuffer = await webmBlob.arrayBuffer();
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+            
+            const wavBuffer = audioBufferToWav(audioBuffer);
+            return new Blob([wavBuffer], { type: 'audio/wav' });
+        }
+
+        function audioBufferToWav(buffer) {
+            const length = buffer.length * buffer.numberOfChannels * 2 + 44;
+            const arrayBuffer = new ArrayBuffer(length);
+            const view = new DataView(arrayBuffer);
+            const channels = [];
+            let offset = 0;
+            let pos = 0;
+
+            const setUint16 = (data) => {
+                view.setUint16(pos, data, true);
+                pos += 2;
+            };
+            const setUint32 = (data) => {
+                view.setUint32(pos, data, true);
+                pos += 4;
+            };
+
+            setUint32(0x46464952); // "RIFF"
+            setUint32(length - 8);
+            setUint32(0x45564157); // "WAVE"
+            setUint32(0x20746d66); // "fmt "
+            setUint32(16);
+            setUint16(1);
+            setUint16(buffer.numberOfChannels);
+            setUint32(buffer.sampleRate);
+            setUint32(buffer.sampleRate * buffer.numberOfChannels * 2);
+            setUint16(buffer.numberOfChannels * 2);
+            setUint16(16);
+            setUint32(0x61746164); // "data"
+            setUint32(length - pos - 4);
+
+            for (let i = 0; i < buffer.numberOfChannels; i++) {
+                channels.push(buffer.getChannelData(i));
+            }
+
+            while (pos < length) {
+                for (let i = 0; i < buffer.numberOfChannels; i++) {
+                    let sample = Math.max(-1, Math.min(1, channels[i][offset]));
+                    sample = sample < 0 ? sample * 0x8000 : sample * 0x7fff;
+                    view.setInt16(pos, sample, true);
+                    pos += 2;
+                }
+                offset++;
+            }
+
+            return arrayBuffer;
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+        }
+
+        function displayResult(result) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<h3>处理结果：</h3><pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            resultDiv.className = 'result';
+        }
+    </script>
+</body>
+</html>

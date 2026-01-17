@@ -10,6 +10,7 @@ import { MineView } from './components/MineView';
 import { MoodView } from './components/MoodView';
 import { InspirationView } from './components/InspirationView';
 import { TodoView } from './components/TodoView';
+import { HomeInput } from './components/HomeInput';
 import { 
   Tab, 
   MoodAction, 
@@ -429,6 +430,11 @@ export default function App() {
                </div>
                
                <AIEntity imageUrl={characterImageUrl} />
+               
+               {/* Home Input Component */}
+               <div className="mt-8 w-full">
+                 <HomeInput onRecordComplete={loadAllData} />
+               </div>
             </div>
             
             <CustomizationButton onClick={() => setShowCustomizationDialog(true)} />
