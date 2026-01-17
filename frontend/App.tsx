@@ -4,6 +4,7 @@ import { TopActions } from './components/TopActions';
 import { BottomNav } from './components/BottomNav';
 import { CustomizationButton } from './components/CustomizationButton';
 import { CharacterCustomizationDialog, CharacterPreferences } from './components/CharacterCustomizationDialog';
+import { ChatDialog } from './components/ChatDialog';
 import { RecordView } from './components/RecordView';
 import { CommunityView } from './components/CommunityView';
 import { MineView } from './components/MineView';
@@ -587,6 +588,7 @@ export default function App() {
   const [characterImageUrl, setCharacterImageUrl] = useState<string | undefined>();
   const [characterPreferences, setCharacterPreferences] = useState<CharacterPreferences | undefined>();
   const [showCustomizationDialog, setShowCustomizationDialog] = useState(false);
+  const [showChatDialog, setShowChatDialog] = useState(false);
   
   // State to manage full-screen action views (like Mood Page)
   const [activeActionView, setActiveActionView] = useState<MoodAction | null>(null);
@@ -644,6 +646,11 @@ export default function App() {
       setLoading(false);
     }
   };
+
+  // 获取最近的录音记录
+  const latestVoiceRecord = records
+    .filter(r => r.sourceType === RecordSource.VOICE)
+    .sort((a, b) => b.createdAt - a.createdAt)[0]?.content;
 
   // Chat with AI
   const handleSendMessage = async (message: string): Promise<string> => {
@@ -766,6 +773,10 @@ export default function App() {
     setCurrentTab(tab);
   };
 
+  const handleOpenChat = () => {
+    setShowChatDialog(true);
+  };
+
   const isHome = currentTab === Tab.HOME;
 
   return (
@@ -786,7 +797,12 @@ export default function App() {
                  I'm here with you
                </div>
                
-               <AIEntity imageUrl={characterImageUrl} />
+               <AIEntity 
+                 imageUrl={characterImageUrl}
+                 latestRecord={latestVoiceRecord}
+                 onGreeting={(greeting) => console.log('AI greeting:', greeting)}
+                 onOpenChat={handleOpenChat}
+               />
                
                {/* Home Input Component */}
                <div className="mt-8 w-full">
@@ -862,6 +878,14 @@ export default function App() {
         }}
         currentPreferences={characterPreferences}
         currentImageUrl={characterImageUrl}
+      />
+
+      {/* Chat Dialog */}
+      <ChatDialog
+        isOpen={showChatDialog}
+        onClose={() => setShowChatDialog(false)}
+        characterImageUrl={characterImageUrl}
+        onSendMessage={handleSendMessage}
       />
     </div>
   );
