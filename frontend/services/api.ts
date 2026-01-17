@@ -2,7 +2,27 @@
  * API Service for communicating with the backend
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// 自动检测 API 地址
+// 如果通过局域网 IP 访问前端，自动使用相同的 IP 访问后端
+const getApiBaseUrl = () => {
+  // 优先使用环境变量
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // 自动检测：如果前端不是通过 localhost 访问，使用相同的 host
+  const currentHost = window.location.hostname;
+  if (currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
+    return `http://${currentHost}:8000`;
+  }
+  
+  // 默认使用 localhost
+  return 'http://localhost:8000';
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
+console.log('🔗 API Base URL:', API_BASE_URL);
 
 export interface ProcessResponse {
   record_id: string;

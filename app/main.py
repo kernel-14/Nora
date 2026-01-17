@@ -98,9 +98,19 @@ app.add_middleware(
 
 # Mount static files for generated images
 from pathlib import Path
+from fastapi import Request
+
 generated_images_dir = Path("generated_images")
 generated_images_dir.mkdir(exist_ok=True)
 app.mount("/generated_images", StaticFiles(directory="generated_images"), name="generated_images")
+
+
+def get_base_url(request: Request) -> str:
+    """获取请求的基础 URL（支持局域网访问）"""
+    # 使用请求的 host 来构建 URL
+    scheme = request.url.scheme  # http 或 https
+    host = request.headers.get("host", "localhost:8000")
+    return f"{scheme}://{host}"
 
 
 @app.get("/")
@@ -676,7 +686,7 @@ async def chat_with_ai(text: str = Form(...)):
 
 
 @app.get("/api/user/config")
-async def get_user_config():
+async def get_user_config(request: Request):
     """Get user configuration including character image."""
     try:
         from app.user_config import UserConfig
@@ -686,6 +696,8 @@ async def get_user_config():
         config = get_config()
         user_config = UserConfig(str(config.data_dir))
         user_data = user_config.load_config()
+        
+        base_url = get_base_url(request)
         
         # 如果没有保存的图片，尝试加载最新的本地图片
         if not user_data.get('character', {}).get('image_url'):
@@ -697,8 +709,8 @@ async def get_user_config():
                     # 按修改时间排序，获取最新的
                     latest_image = max(image_files, key=lambda p: p.stat().st_mtime)
                     
-                    # 构建 URL 路径
-                    image_url = f"http://localhost:8000/generated_images/{latest_image.name}"
+                    # 构建 URL 路径（使用动态 base_url）
+                    image_url = f"{base_url}/generated_images/{latest_image.name}"
                     
                     # 从文件名提取偏好设置
                     # 格式: character_颜色_性格_时间戳.jpeg
@@ -730,14 +742,14 @@ async def get_user_config():
             # 本地路径，转换为 URL（处理 Windows 和 Unix 路径）
             image_path = Path(image_url)
             if image_path.exists():
-                # 使用正斜杠构建 URL
-                user_data['character']['image_url'] = f"http://localhost:8000/generated_images/{image_path.name}"
+                # 使用正斜杠构建 URL（使用动态 base_url）
+                user_data['character']['image_url'] = f"{base_url}/generated_images/{image_path.name}"
             else:
                 # 如果路径不存在，尝试只使用文件名
                 filename = image_path.name
                 full_path = Path("generated_images") / filename
                 if full_path.exists():
-                    user_data['character']['image_url'] = f"http://localhost:8000/generated_images/{filename}"
+                    user_data['character']['image_url'] = f"{base_url}/generated_images/{filename}"
                     logger.info(f"Converted path to URL: {filename}")
         
         return user_data
@@ -751,6 +763,7 @@ async def get_user_config():
 
 @app.post("/api/character/generate")
 async def generate_character(
+    request: Request,
     color: str = Form(...),
     personality: str = Form(...),
     appearance: str = Form(...),
@@ -856,9 +869,16 @@ async def generate_character(
             
             logger.info(f"Character image generated and saved: {image_url}")
             
+            # 返回 HTTP URL（使用动态 base_url）
+            base_url = get_base_url(request)
+            if local_path:
+                http_url = f"{base_url}/generated_images/{local_path.name}"
+            else:
+                http_url = image_url
+            
             return {
                 "success": True,
-                "image_url": image_url,
+                "image_url": http_url,
                 "prompt": result['prompt'],
                 "preferences": preferences,
                 "task_id": result.get('task_id')
@@ -899,7 +919,7 @@ async def generate_character(
 
 
 @app.get("/api/character/history")
-async def get_character_history():
+async def get_character_history(request: Request):
     """Get list of all generated character images.
     
     Returns:
@@ -909,6 +929,7 @@ async def get_character_history():
         from pathlib import Path
         import os
         
+        base_url = get_base_url(request)
         generated_images_dir = Path("generated_images")
         
         if not generated_images_dir.exists():
@@ -929,7 +950,7 @@ async def get_character_history():
                 
                 image_files.append({
                     "filename": file.name,
-                    "url": f"http://localhost:8000/generated_images/{file.name}",
+                    "url": f"{base_url}/generated_images/{file.name}",
                     "color": color,
                     "personality": personality,
                     "timestamp": timestamp,
@@ -951,6 +972,7 @@ async def get_character_history():
 
 @app.post("/api/character/select")
 async def select_character(
+    request: Request,
     filename: str = Form(...)
 ):
     """Select a historical character image as current.
@@ -998,8 +1020,9 @@ async def select_character(
         
         logger.info(f"Selected historical character: {filename}")
         
-        # 返回 HTTP URL
-        http_url = f"http://localhost:8000/generated_images/{filename}"
+        # 返回 HTTP URL（使用动态 base_url）
+        base_url = get_base_url(request)
+        http_url = f"{base_url}/generated_images/{filename}"
         
         return {
             "success": True,

@@ -25,7 +25,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({ posts, onAddPost }
         {/* Header */}
         <div className="mb-8 text-center opacity-0 animate-[fadeSlideUp_1s_ease-out_forwards]">
           <h2 className="text-xl font-light text-slate-600/60 tracking-tight font-serif italic">
-            You’re not alone here.
+            你并不孤单
           </h2>
         </div>
 
@@ -71,11 +71,11 @@ export const CommunityView: React.FC<CommunityViewProps> = ({ posts, onAddPost }
               <X size={20} />
             </button>
 
-            <h3 className="text-lg font-medium text-slate-600 mb-6 pl-1">Share a thought...</h3>
+            <h3 className="text-lg font-medium text-slate-600 mb-6 pl-1">分享一个想法...</h3>
 
             <textarea
               className="w-full h-32 bg-transparent text-slate-700 text-lg font-light placeholder:text-slate-400/50 resize-none focus:outline-none"
-              placeholder="What’s on your mind? Say it gently."
+              placeholder="此刻你在想什么？轻轻说出来吧。"
               value={newContent}
               onChange={(e) => setNewContent(e.target.value)}
               autoFocus
@@ -92,7 +92,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({ posts, onAddPost }
                     : 'bg-slate-200/50 text-slate-400 cursor-not-allowed'}
                 `}
               >
-                Post
+                发布
               </button>
             </div>
           </div>

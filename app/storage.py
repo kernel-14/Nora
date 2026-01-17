@@ -59,9 +59,9 @@ class StorageService:
         self.data_dir.mkdir(parents=True, exist_ok=True)
     
     def _ensure_file_exists(self, file_path: Path) -> None:
-        """Ensure a JSON file exists and is initialized as an empty array.
+        """Ensure a JSON file exists and is initialized with default data.
         
-        If the file doesn't exist, creates it with an empty array [].
+        If the file doesn't exist, creates it with sample Chinese data.
         
         Args:
             file_path: Path to the JSON file
@@ -73,12 +73,265 @@ class StorageService:
         """
         if not file_path.exists():
             try:
+                # 根据文件类型提供不同的默认数据
+                default_data = []
+                
+                if file_path.name == 'records.json':
+                    default_data = self._get_default_records()
+                elif file_path.name == 'moods.json':
+                    default_data = self._get_default_moods()
+                elif file_path.name == 'inspirations.json':
+                    default_data = self._get_default_inspirations()
+                elif file_path.name == 'todos.json':
+                    default_data = self._get_default_todos()
+                elif file_path.name == 'user_config.json':
+                    default_data = self._get_default_user_config()
+                
                 with open(file_path, 'w', encoding='utf-8') as f:
-                    json.dump([], f, ensure_ascii=False, indent=2)
+                    json.dump(default_data, f, ensure_ascii=False, indent=2)
             except Exception as e:
                 raise StorageError(
                     f"Failed to initialize file {file_path}: {str(e)}"
                 )
+    
+    def _get_default_records(self) -> list:
+        """获取默认的记录数据"""
+        from datetime import datetime, timedelta
+        now = datetime.now()
+        
+        return [
+            {
+                "record_id": "welcome-1",
+                "timestamp": (now - timedelta(hours=2)).isoformat() + "Z",
+                "input_type": "text",
+                "original_text": "今天天气真好，阳光洒在窗台上，心情也跟着明朗起来。决定下午去公园散散步，感受一下大自然的美好。",
+                "parsed_data": {
+                    "mood": {
+                        "type": "喜悦",
+                        "intensity": 8,
+                        "keywords": ["阳光", "明朗", "美好"]
+                    },
+                    "inspirations": [
+                        {
+                            "core_idea": "享受自然的美好时光",
+                            "tags": ["自然", "散步", "放松"],
+                            "category": "生活"
+                        }
+                    ],
+                    "todos": [
+                        {
+                            "task": "去公园散步",
+                            "time": "下午",
+                            "location": "公园",
+                            "status": "pending"
+                        }
+                    ]
+                }
+            },
+            {
+                "record_id": "welcome-2",
+                "timestamp": (now - timedelta(hours=5)).isoformat() + "Z",
+                "input_type": "text",
+                "original_text": "刚看完一本很棒的书，书中的一句话让我印象深刻：'生活不是等待暴风雨过去，而是学会在雨中跳舞。'这句话给了我很多启发。",
+                "parsed_data": {
+                    "mood": {
+                        "type": "平静",
+                        "intensity": 7,
+                        "keywords": ["启发", "思考", "感悟"]
+                    },
+                    "inspirations": [
+                        {
+                            "core_idea": "学会在困难中保持积极",
+                            "tags": ["人生哲理", "积极心态", "成长"],
+                            "category": "学习"
+                        }
+                    ],
+                    "todos": []
+                }
+            },
+            {
+                "record_id": "welcome-3",
+                "timestamp": (now - timedelta(days=1, hours=3)).isoformat() + "Z",
+                "input_type": "text",
+                "original_text": "和好朋友聊了很久，她分享了最近的生活和工作。虽然大家都很忙，但能抽时间见面真的很珍贵。友谊需要用心维护。",
+                "parsed_data": {
+                    "mood": {
+                        "type": "温暖",
+                        "intensity": 9,
+                        "keywords": ["友谊", "珍贵", "陪伴"]
+                    },
+                    "inspirations": [
+                        {
+                            "core_idea": "珍惜身边的朋友",
+                            "tags": ["友情", "陪伴", "珍惜"],
+                            "category": "生活"
+                        }
+                    ],
+                    "todos": [
+                        {
+                            "task": "定期和朋友联系",
+                            "time": null,
+                            "location": null,
+                            "status": "pending"
+                        }
+                    ]
+                }
+            },
+            {
+                "record_id": "welcome-4",
+                "timestamp": (now - timedelta(days=2)).isoformat() + "Z",
+                "input_type": "text",
+                "original_text": "今天完成了一个困扰我很久的项目，虽然过程很辛苦，但看到成果的那一刻，所有的付出都值得了。成就感满满！",
+                "parsed_data": {
+                    "mood": {
+                        "type": "兴奋",
+                        "intensity": 10,
+                        "keywords": ["成就感", "完成", "满足"]
+                    },
+                    "inspirations": [],
+                    "todos": []
+                }
+            },
+            {
+                "record_id": "welcome-5",
+                "timestamp": (now - timedelta(days=3)).isoformat() + "Z",
+                "input_type": "text",
+                "original_text": "最近工作压力有点大，总是担心做不好。但转念一想，每个人都会遇到困难，重要的是保持积极的心态，一步一步来。",
+                "parsed_data": {
+                    "mood": {
+                        "type": "焦虑",
+                        "intensity": 6,
+                        "keywords": ["压力", "担心", "积极"]
+                    },
+                    "inspirations": [
+                        {
+                            "core_idea": "保持积极心态面对压力",
+                            "tags": ["心态", "压力管理", "成长"],
+                            "category": "工作"
+                        }
+                    ],
+                    "todos": []
+                }
+            }
+        ]
+    
+    def _get_default_moods(self) -> list:
+        """获取默认的心情数据"""
+        from datetime import datetime, timedelta
+        now = datetime.now()
+        
+        return [
+            {
+                "record_id": "welcome-1",
+                "timestamp": (now - timedelta(hours=2)).isoformat() + "Z",
+                "type": "喜悦",
+                "intensity": 8,
+                "keywords": ["阳光", "明朗", "美好"]
+            },
+            {
+                "record_id": "welcome-2",
+                "timestamp": (now - timedelta(hours=5)).isoformat() + "Z",
+                "type": "平静",
+                "intensity": 7,
+                "keywords": ["启发", "思考", "感悟"]
+            },
+            {
+                "record_id": "welcome-3",
+                "timestamp": (now - timedelta(days=1, hours=3)).isoformat() + "Z",
+                "type": "温暖",
+                "intensity": 9,
+                "keywords": ["友谊", "珍贵", "陪伴"]
+            },
+            {
+                "record_id": "welcome-4",
+                "timestamp": (now - timedelta(days=2)).isoformat() + "Z",
+                "type": "兴奋",
+                "intensity": 10,
+                "keywords": ["成就感", "完成", "满足"]
+            },
+            {
+                "record_id": "welcome-5",
+                "timestamp": (now - timedelta(days=3)).isoformat() + "Z",
+                "type": "焦虑",
+                "intensity": 6,
+                "keywords": ["压力", "担心", "积极"]
+            }
+        ]
+    
+    def _get_default_inspirations(self) -> list:
+        """获取默认的灵感数据"""
+        from datetime import datetime, timedelta
+        now = datetime.now()
+        
+        return [
+            {
+                "record_id": "welcome-1",
+                "timestamp": (now - timedelta(hours=2)).isoformat() + "Z",
+                "core_idea": "享受自然的美好时光",
+                "tags": ["自然", "散步", "放松"],
+                "category": "生活"
+            },
+            {
+                "record_id": "welcome-2",
+                "timestamp": (now - timedelta(hours=5)).isoformat() + "Z",
+                "core_idea": "学会在困难中保持积极",
+                "tags": ["人生哲理", "积极心态", "成长"],
+                "category": "学习"
+            },
+            {
+                "record_id": "welcome-3",
+                "timestamp": (now - timedelta(days=1, hours=3)).isoformat() + "Z",
+                "core_idea": "珍惜身边的朋友",
+                "tags": ["友情", "陪伴", "珍惜"],
+                "category": "生活"
+            },
+            {
+                "record_id": "welcome-5",
+                "timestamp": (now - timedelta(days=3)).isoformat() + "Z",
+                "core_idea": "保持积极心态面对压力",
+                "tags": ["心态", "压力管理", "成长"],
+                "category": "工作"
+            }
+        ]
+    
+    def _get_default_todos(self) -> list:
+        """获取默认的待办数据"""
+        from datetime import datetime, timedelta
+        now = datetime.now()
+        
+        return [
+            {
+                "record_id": "welcome-1",
+                "timestamp": (now - timedelta(hours=2)).isoformat() + "Z",
+                "task": "去公园散步",
+                "time": "下午",
+                "location": "公园",
+                "status": "pending"
+            },
+            {
+                "record_id": "welcome-3",
+                "timestamp": (now - timedelta(days=1, hours=3)).isoformat() + "Z",
+                "task": "定期和朋友联系",
+                "time": null,
+                "location": null,
+                "status": "pending"
+            }
+        ]
+    
+    def _get_default_user_config(self) -> dict:
+        """获取默认的用户配置"""
+        return {
+            "character": {
+                "image_url": "generated_images/character_薰衣草紫_温柔_20260117_183825.jpeg",
+                "prompt": "默认形象：薰衣草紫色温柔猫咪",
+                "preferences": {
+                    "color": "薰衣草紫",
+                    "personality": "温柔",
+                    "appearance": "无配饰",
+                    "role": "陪伴式朋友"
+                }
+            }
+        }
     
     def _read_json_file(self, file_path: Path) -> List:
         """Read and parse a JSON file.

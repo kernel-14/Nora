@@ -122,7 +122,7 @@ export const MoodView: React.FC<MoodViewProps> = ({
         />
 
         {/* 物理引擎气泡容器 */}
-        <div className="flex-1 w-full max-w-md mx-auto relative overflow-hidden">
+        <div className="flex-1 w-full max-w-md mx-auto relative" style={{ minHeight: '500px' }}>
           {/* 提示文字 */}
           {moodsData.length === 0 && (
             <div className="absolute inset-0 flex items-center justify-center">
@@ -132,10 +132,12 @@ export const MoodView: React.FC<MoodViewProps> = ({
 
           {/* 物理气泡 */}
           {moodsData.length > 0 && (
-            <SimpleMoodBubble
-              moods={moodsData}
-              onMoodClick={handleMoodClick}
-            />
+            <div className="absolute inset-0">
+              <SimpleMoodBubble
+                moods={moodsData}
+                onMoodClick={handleMoodClick}
+              />
+            </div>
           )}
 
           {/* 使用说明 */}

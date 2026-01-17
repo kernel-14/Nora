@@ -7,7 +7,7 @@ export interface MoodData {
   intensity: number;
   timestamp: string;
   keywords: string[];
-  originalText?: string;  // 添加原文字段
+  originalText?: string;
 }
 
 interface SimpleMoodBubbleProps {
@@ -39,13 +39,16 @@ export const SimpleMoodBubble: React.FC<SimpleMoodBubbleProps> = ({ moods, onMoo
     const width = sceneRef.current.clientWidth;
     const height = sceneRef.current.clientHeight;
 
+    if (width === 0 || height === 0) {
+      console.warn('⚠️ 容器尺寸为0，等待下次渲染');
+      return;
+    }
+
     console.log('🎨 初始化气泡池:', { width, height, count: moods.length });
 
-    // 创建引擎
     const engine = Matter.Engine.create({ gravity: { x: 0, y: 0.05, scale: 0.001 } });
     engineRef.current = engine;
 
-    // 创建渲染器
     const render = Matter.Render.create({
       element: sceneRef.current,
       engine: engine,
@@ -57,7 +60,6 @@ export const SimpleMoodBubble: React.FC<SimpleMoodBubbleProps> = ({ moods, onMoo
       },
     });
 
-    // 创建边界
     const walls = [
       Matter.Bodies.rectangle(width / 2, -25, width, 50, { isStatic: true, render: { visible: false } }),
       Matter.Bodies.rectangle(width / 2, height + 25, width, 50, { isStatic: true, render: { visible: false } }),
@@ -66,7 +68,6 @@ export const SimpleMoodBubble: React.FC<SimpleMoodBubbleProps> = ({ moods, onMoo
     ];
     Matter.World.add(engine.world, walls);
 
-    // 创建气泡
     const bubbles = moods.map((mood, i) => {
       const radius = 25 + (mood.intensity / 10) * 35;
       const angle = (i / moods.length) * Math.PI * 2;
@@ -79,7 +80,7 @@ export const SimpleMoodBubble: React.FC<SimpleMoodBubbleProps> = ({ moods, onMoo
         restitution: 0.6,
         friction: 0.01,
         frictionAir: 0.02,
-        render: { fillStyle: color, strokeStyle: '#fff', lineWidth: 2 },
+        render: { fillStyle: color, strokeStyle: '#94A3B8', lineWidth: 2 },
         label: mood.id,
       });
 
@@ -93,7 +94,6 @@ export const SimpleMoodBubble: React.FC<SimpleMoodBubbleProps> = ({ moods, onMoo
 
     Matter.World.add(engine.world, bubbles.map(b => b.body));
 
-    // 鼠标交互
     const mouse = Matter.Mouse.create(render.canvas);
     const mouseConstraint = Matter.MouseConstraint.create(engine, {
       mouse,
@@ -101,9 +101,7 @@ export const SimpleMoodBubble: React.FC<SimpleMoodBubbleProps> = ({ moods, onMoo
     });
     Matter.World.add(engine.world, mouseConstraint);
 
-    // 左键点击事件
     Matter.Events.on(mouseConstraint, 'mousedown', (event) => {
-      // 只处理左键点击（button 0）
       if (event.mouse.button === 0) {
         const clicked = Matter.Query.point(bubbles.map(b => b.body), event.mouse.position)[0];
         if (clicked) {
@@ -114,36 +112,27 @@ export const SimpleMoodBubble: React.FC<SimpleMoodBubbleProps> = ({ moods, onMoo
       }
     });
 
-    // 右键取消选择
     const handleContextMenu = (e: MouseEvent) => {
-      e.preventDefault(); // 阻止默认右键菜单
-      
+      e.preventDefault();
       if (selectedBubbleRef.current) {
-        // 取消选择效果（可以添加视觉反馈）
         selectedBubbleRef.current = null;
         console.log('✨ 取消选择气泡');
-        
-        // 关闭详情弹窗（通过传递 null）
-        onMoodClick(null as any);
+        onMoodClick(null);
       }
     };
 
-    // 添加右键事件监听
     if (render.canvas) {
       render.canvas.addEventListener('contextmenu', handleContextMenu);
     }
 
-    // 自定义渲染文字
     Matter.Events.on(render, 'afterRender', () => {
       const ctx = render.context;
       bubbles.forEach(({ body, mood }) => {
-        // 如果是选中的气泡，添加高亮效果
         const isSelected = selectedBubbleRef.current === body;
         
         if (isSelected) {
-          // 绘制选中高亮圈
           ctx.save();
-          ctx.strokeStyle = 'rgba(147, 51, 234, 0.6)'; // 紫色高亮
+          ctx.strokeStyle = 'rgba(147, 51, 234, 0.6)';
           ctx.lineWidth = 4;
           ctx.beginPath();
           ctx.arc(body.position.x, body.position.y, (body.circleRadius || 30) + 8, 0, Math.PI * 2);
@@ -151,9 +140,8 @@ export const SimpleMoodBubble: React.FC<SimpleMoodBubbleProps> = ({ moods, onMoo
           ctx.restore();
         }
         
-        // 绘制文字
         ctx.save();
-        ctx.fillStyle = isSelected ? '#7c3aed' : '#334155'; // 选中时文字变紫色
+        ctx.fillStyle = isSelected ? '#7c3aed' : '#334155';
         ctx.font = `${Math.max(12, (body.circleRadius || 30) * 0.35)}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -162,14 +150,12 @@ export const SimpleMoodBubble: React.FC<SimpleMoodBubbleProps> = ({ moods, onMoo
       });
     });
 
-    // 启动
     const runner = Matter.Runner.create();
     Matter.Runner.run(runner, engine);
     Matter.Render.run(render);
 
-    console.log('✅ 气泡池启动成功');
+    console.log('✅ 气泡池启动成功，共', bubbles.length, '个气泡');
 
-    // 清理
     return () => {
       if (render.canvas) {
         render.canvas.removeEventListener('contextmenu', handleContextMenu);
@@ -181,7 +167,7 @@ export const SimpleMoodBubble: React.FC<SimpleMoodBubbleProps> = ({ moods, onMoo
       render.canvas.remove();
       render.textures = {};
     };
-  }, []); // 空依赖，只运行一次
+  }, [moods, onMoodClick]);
 
   return <div ref={sceneRef} style={{ width: '100%', height: '100%' }} />;
 };

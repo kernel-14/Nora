@@ -40,31 +40,31 @@ const generateMockRecords = (): RecordItem[] => {
   return [
     {
       id: '1',
-      content: "I felt a sudden wave of calm when I looked at the clouds today. They were moving so slowly, reminding me that there's no rush.",
+      content: "今天看云的时候突然感到一阵平静。云朵移动得很慢，提醒我不必着急。",
       createdAt: now - 1000 * 60 * 30, 
       sourceType: RecordSource.MOOD
     },
     {
       id: '2',
-      content: "Idea for the weekend: visit that old bookstore downtown and find a book with a blue cover.",
+      content: "周末的想法：去市中心那家老书店，找一本蓝色封面的书。",
       createdAt: now - 1000 * 60 * 60 * 4, 
       sourceType: RecordSource.INSPIRATION
     },
     {
       id: '3',
-      content: "Sometimes silence is the loudest answer provided by life. I need to learn to listen to it more often.",
+      content: "有时候沉默是生活给出的最响亮的答案。我需要学会更多地倾听它。",
       createdAt: now - day, 
       sourceType: RecordSource.MANUAL
     },
     {
       id: '4',
-      content: "Heavy rain outside. It feels cozy but also a bit lonely.",
+      content: "外面下着大雨。感觉很温馨，但也有点孤独。",
       createdAt: now - day - 1000 * 60 * 60 * 2, 
       sourceType: RecordSource.VOICE
     },
     {
       id: '5',
-      content: "Remember to call mom.",
+      content: "记得给妈妈打电话。",
       createdAt: now - day * 2, 
       sourceType: RecordSource.MANUAL
     }
@@ -77,8 +77,8 @@ const generateMockPosts = (): CommunityPost[] => {
   return [
     {
       id: '101',
-      user: { name: 'Quiet Observer', avatarColor: 'bg-indigo-200' },
-      content: "Does anyone else feel like they are waiting for something that hasn't happened yet? It's a strange kind of nostalgia for the future.",
+      user: { name: '安静的观察者', avatarColor: 'bg-indigo-200' },
+      content: "有人也觉得自己在等待一些还没发生的事情吗？这是一种对未来的奇怪怀念。",
       createdAt: now - 1000 * 60 * 10, // 10 mins ago
       likeCount: 12,
       isLiked: false,
@@ -86,8 +86,8 @@ const generateMockPosts = (): CommunityPost[] => {
     },
     {
       id: '102',
-      user: { name: 'Gentle Soul', avatarColor: 'bg-pink-200' },
-      content: "Made a cup of tea and just watched the steam rise for 5 minutes. Best part of my day.",
+      user: { name: '温柔的灵魂', avatarColor: 'bg-pink-200' },
+      content: "泡了一杯茶，看着蒸汽升起看了5分钟。这是我今天最美好的时刻。",
       createdAt: now - 1000 * 60 * 45,
       likeCount: 28,
       isLiked: true,
@@ -95,8 +95,8 @@ const generateMockPosts = (): CommunityPost[] => {
     },
     {
       id: '103',
-      user: { name: 'Anonymous', avatarColor: 'bg-teal-200' },
-      content: "I'm trying to be kinder to myself today. It's harder than being kind to others.",
+      user: { name: '匿名', avatarColor: 'bg-teal-200' },
+      content: "今天我试着对自己更温柔一些。这比对别人温柔更难。",
       createdAt: now - 1000 * 60 * 60 * 2,
       likeCount: 45,
       isLiked: false,
@@ -104,8 +104,8 @@ const generateMockPosts = (): CommunityPost[] => {
     },
      {
       id: '104',
-      user: { name: 'Cloud Walker', avatarColor: 'bg-blue-200' },
-      content: "The sunset was unusually pink today.",
+      user: { name: '云中漫步者', avatarColor: 'bg-blue-200' },
+      content: "今天的日落特别粉。",
       createdAt: now - 1000 * 60 * 60 * 5,
       likeCount: 8,
       isLiked: false,
@@ -116,15 +116,15 @@ const generateMockPosts = (): CommunityPost[] => {
 
 // Mock Data: Profile & Device
 const mockProfile: Profile = {
-  name: "Elara",
-  birthday: "Mar 12",
-  moodStatus: "Feeling calm and present",
+  name: "小雅",
+  birthday: "3月12日",
+  moodStatus: "感觉平静而专注",
 };
 
 const mockDeviceStatus: DeviceStatus = {
   isConnected: true,
   batteryLevel: 82,
-  deviceName: "SoulMate Pendant"
+  deviceName: "心灵伴侣吊坠"
 };
 
 // Mock Data: Moods
@@ -164,27 +164,27 @@ const generateMockInspirations = (): InspirationItem[] => {
   return [
     {
       id: 'i1',
-      content: "What if clouds are just the earth dreaming?",
+      content: "如果云朵只是地球在做梦呢？",
       createdAt: now - 1000 * 60 * 15,
-      tags: ['random', 'nature']
+      tags: ['随想', '自然']
     },
     {
       id: 'i2',
-      content: "Design concept: A clock that doesn't show numbers, only colors representing the energy of the day.",
+      content: "设计概念：一个不显示数字的时钟，只用颜色代表一天的能量。",
       createdAt: now - 1000 * 60 * 60 * 3,
-      tags: ['design', 'idea']
+      tags: ['设计', '创意']
     },
     {
       id: 'i3',
-      content: "The smell of old books and coffee.",
+      content: "旧书和咖啡的香气。",
       createdAt: now - 1000 * 60 * 60 * 24 * 2,
-      tags: ['life']
+      tags: ['生活']
     },
     {
       id: 'i4',
-      content: "Remember to breathe deeply before answering calls.",
+      content: "记得在接电话前深呼吸。",
       createdAt: now - 1000 * 60 * 60 * 24 * 5,
-      tags: ['reminder']
+      tags: ['提醒']
     }
   ];
 };
@@ -195,7 +195,7 @@ const generateMockTodos = (): TodoItem[] => {
   return [
     {
       id: 't1',
-      title: "Drink a glass of water slowly",
+      title: "慢慢喝一杯水",
       createdAt: now,
       scheduledAt: now + 1000 * 60 * 30, // 30 mins later
       isDone: false,
@@ -203,7 +203,7 @@ const generateMockTodos = (): TodoItem[] => {
     },
     {
       id: 't2',
-      title: "Read 20 pages of 'The Little Prince'",
+      title: "读《小王子》20页",
       createdAt: now - 1000 * 60 * 60,
       scheduledAt: now + 1000 * 60 * 60 * 2,
       isDone: false,
@@ -211,7 +211,7 @@ const generateMockTodos = (): TodoItem[] => {
     },
     {
       id: 't3',
-      title: "Reply to Sarah's email about the project",
+      title: "回复小雪关于项目的邮件",
       createdAt: now - 1000 * 60 * 60 * 4,
       scheduledAt: now + 1000 * 60 * 60 * 24, // Tomorrow
       isDone: false,
@@ -219,7 +219,7 @@ const generateMockTodos = (): TodoItem[] => {
     },
     {
       id: 't4',
-      title: "Buy fresh flowers",
+      title: "买鲜花",
       createdAt: now - 1000 * 60 * 60 * 24,
       isDone: true,
       category: 'life'
