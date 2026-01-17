@@ -1,12 +1,14 @@
 ---
-title: Nora
-emoji: 🐱
-colorFrom: pink
-colorTo: purple
-sdk: streamlit
-sdk_version: 1.31.0
+title: SoulMate AI Companion
+emoji: 🌟
+colorFrom: purple
+colorTo: pink
+sdk: gradio
+sdk_version: "4.44.0"
 app_file: app.py
 pinned: false
+license: mit
+python_version: "3.11"
 ---
 
 
