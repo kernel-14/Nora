@@ -1,9 +1,9 @@
 # Hugging Face Spaces Requirements
 
-# Gradio (Hugging Face Spaces SDK)
-gradio==4.44.0
+# Gradio (Hugging Face Spaces SDK) - 使用稳定版本
+gradio==4.19.2
 
-# Core dependencies (updated for Python 3.13 compatibility)
+# Core dependencies (compatible with Python 3.11+)
 fastapi==0.115.0
 uvicorn[standard]==0.32.0
 pydantic==2.10.0
