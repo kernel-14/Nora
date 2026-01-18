@@ -1,34 +1,34 @@
 ---
-title: SoulMate AI Companion
+title: Nora - 治愈系记录助手
 emoji: 🌟
 colorFrom: purple
 colorTo: pink
-sdk: gradio
-sdk_version: "4.44.0"
-app_file: app.py
+sdk: docker
 pinned: false
 license: mit
-python_version: "3.11"
 ---
 
 # 🌟 治愈系记录助手 - SoulMate AI Companion
 
-一个温暖、治愈的 AI 陪伴应用，帮助你记录心情、捕捉灵感、管理待办，并随时与 AI 助手对话。
+一个温暖、治愈的 AI 陪伴应用，帮助你记录心情、捕捉灵感、管理待办。
 
 ## ✨ 核心特性
 
 - 🎤 **语音/文字快速记录** - 自动分类保存
 - 🤖 **AI 语义解析** - 智能提取情绪、灵感和待办
 - 💬 **AI 对话陪伴（RAG）** - 基于历史记录的个性化对话
-- 🖼️ **AI 形象定制** - 生成专属的治愈系猫咪角色
+- 🖼️ **AI 形象定制** - 生成专属治愈系角色（720 种组合）
 - 🫧 **物理引擎心情池** - 基于 Matter.js 的动态气泡可视化
-- 💾 **本地存储** - 数据安全保存
 
 ## 🚀 快速开始
 
-### 1. 配置 API 密钥
+### 在线使用
 
-在 Space Settings → Repository secrets 中添加：
+直接访问本 Space 即可使用完整功能！
+
+### 配置 API 密钥
+
+在 Space 的 **Settings → Repository secrets** 中配置：
 
 **必需：**
 - `ZHIPU_API_KEY` - 智谱 AI API 密钥
@@ -41,55 +41,31 @@ python_version: "3.11"
   - 获取地址：https://platform.minimaxi.com/
   - 用途：AI 形象生成
 
-### 2. 使用应用
+## 📖 使用说明
 
-1. **首页快速记录** - 点击麦克风录音或输入文字
-2. **查看分类数据** - 点击"心情"、"灵感"、"待办"
-3. **与 AI 对话** - 点击 AI 形象进行对话
-4. **定制 AI 形象** - 点击右下角 ✨ 按钮
+1. **首页快速记录**
+   - 点击麦克风录音或在输入框输入文字
+   - AI 自动分析并分类保存
 
-## 📖 功能说明
+2. **查看分类数据**
+   - 点击顶部心情、灵感、待办图标
+   - 查看不同类型的记录
 
-### 首页快速记录
-在首页通过语音或文字快速记录想法，系统自动分析并分类保存到：
-- 📝 records.json - 完整记录
-- 😊 moods.json - 情绪数据
-- 💡 inspirations.json - 灵感内容
-- ✅ todos.json - 待办事项
+3. **与 AI 对话**
+   - 点击 AI 形象显示问候对话框
+   - 点击对话框中的聊天图标进入完整对话
+   - AI 基于你的历史记录提供个性化回复
 
-### AI 对话陪伴（RAG）
-与 AI 交流时，系统会基于你的历史记录提供个性化回复：
-- 使用 RAG（检索增强生成）技术
-- 基于最近 10 条记录作为知识库
-- 提供有温度的个性化回复
+4. **定制 AI 形象**
+   - 点击右下角 ✨ 按钮
+   - 选择颜色、性格、外观、角色
+   - 生成专属形象（需要 MiniMax API）
 
-### 物理引擎心情气泡池
-基于 Matter.js 的动态心情可视化：
-- 真实物理碰撞效果
-- 可拖拽交互
-- 点击查看详情
-- 30 种情绪类型
-
-### AI 形象定制
-生成专属的治愈系猫咪 AI 陪伴形象：
-- 8 种颜色选择
-- 6 种性格类型
-- 5 种外观配饰
-- 3 种角色定位
-
-## 🛠️ 技术栈
-
-### 后端
-- FastAPI - Web 框架
-- 智谱 AI - ASR 和语义解析
-- MiniMax - 图像生成
-- Pydantic - 数据验证
-
-### 前端
-- React 19 + TypeScript
-- Vite - 构建工具
-- Tailwind CSS - 样式
-- Matter.js - 物理引擎
+5. **心情气泡池**
+   - 点击顶部心情图标
+   - 左右滑动查看不同日期的心情卡片
+   - 点击卡片展开查看当天的气泡池
+   - 可以拖拽气泡，感受物理引擎效果
 
 ## 📊 API 端点
 
@@ -100,42 +76,24 @@ python_version: "3.11"
 - `GET /api/inspirations` - 获取灵感
 - `GET /api/todos` - 获取待办事项
 - `POST /api/character/generate` - 生成角色形象
-
-## 🔒 隐私说明
-
-- 所有数据存储在 Hugging Face Space 的临时存储中
-- 不会上传到外部服务器
-- API 密钥安全存储在环境变量中
-
-## 🐛 故障排除
-
-### ImportError: cannot import name 'HfFolder'
-
-如果遇到此错误，说明 `gradio` 和 `huggingface_hub` 版本不兼容。
-
-**解决方法：**
-1. 确保 `requirements_hf.txt` 中的版本为：
-   - `huggingface-hub==0.23.5`
-   - `gradio==4.44.0`
-2. 在 Space Settings 中点击 "Factory reboot" 强制重建
-3. 或者在 README_HF.md 的 frontmatter 中确认 `sdk_version: "4.44.0"`
-
-### 应用无法启动
-
-1. 检查 Space Logs 查看详细错误信息
-2. 确认已配置 `ZHIPU_API_KEY` 环境变量
-3. 检查 `data/` 和 `generated_images/` 目录是否存在
-
-## 📄 许可证
-
-MIT License
+- `GET /health` - 健康检查
+- `GET /docs` - API 文档
 
 ## 🔗 相关链接
 
-- [GitHub 仓库](https://github.com/your-username/your-repo)
-- [详细文档](https://github.com/your-username/your-repo/blob/main/README.md)
-- [部署指南](https://github.com/your-username/your-repo/blob/main/部署指南.md)
+- [GitHub 仓库](https://github.com/kernel-14/Nora)
+- [详细文档](https://github.com/kernel-14/Nora/blob/main/README.md)
+- [智谱 AI](https://open.bigmodel.cn/)
+- [MiniMax](https://platform.minimaxi.com/)
 
----
+## 📝 技术栈
 
-**享受你的 AI 陪伴之旅！** 🎊
+- **后端**: FastAPI + Python 3.11
+- **前端**: React + TypeScript + Vite
+- **物理引擎**: Matter.js
+- **AI 服务**: 智谱 AI (GLM-4) + MiniMax
+- **部署**: Hugging Face Spaces (Docker)
+
+## 📄 License
+
+MIT License

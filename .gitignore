@@ -56,3 +56,6 @@ Thumbs.db
 frontend/node_modules/
 # 注意：frontend/dist/ 不要忽略，部署需要它！
 
+# Docker（不要忽略 Dockerfile）
+# Dockerfile 需要提交
+
