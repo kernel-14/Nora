@@ -26,9 +26,8 @@ const getApiBaseUrl = () => {
   
   // 局域网访问检测（如 192.168.x.x, 172.x.x.x）
   if (currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
-    // 如果前端有端口，后端使用 8000；否则使用相同端口
-    const backendPort = currentPort ? '8000' : '';
-    return `${currentProtocol}//${currentHost}${backendPort ? ':' + backendPort : ''}`;
+    // 后端始终使用 8000 端口
+    return `${currentProtocol}//${currentHost}:8000`;
   }
   
   // 本地开发环境
@@ -38,6 +37,7 @@ const getApiBaseUrl = () => {
 const API_BASE_URL = getApiBaseUrl();
 
 console.log('🔗 API Base URL:', API_BASE_URL);
+
 
 export interface ProcessResponse {
   record_id: string;
