@@ -1,0 +1,5 @@
+{
+  "framework": "Gradio",
+  "task": "chat",
+  "allow_remote_code": true
+}

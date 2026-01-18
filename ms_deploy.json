@@ -1,0 +1,29 @@
+{
+  "$schema": "https://modelscope.cn/api/v1/studios/deploy_schema.json",
+  "sdk_type": "gradio",
+  "sdk_version": "4.44.1",
+  "resource_configuration": "platform/2v-cpu-16g-mem",
+  "base_image": "ubuntu22.04-py311-torch2.3.1-modelscope1.31.0",
+  "environment_variables": [
+    {
+      "name": "ZHIPU_API_KEY",
+      "value": ""
+    },
+    {
+      "name": "MINIMAX_API_KEY",
+      "value": ""
+    },
+    {
+      "name": "MINIMAX_GROUP_ID",
+      "value": ""
+    },
+    {
+      "name": "DATA_DIR",
+      "value": "data"
+    },
+    {
+      "name": "LOG_LEVEL",
+      "value": "INFO"
+    }
+  ]
+}
