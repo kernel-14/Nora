@@ -699,10 +699,29 @@ async def get_user_config(request: Request):
         
         base_url = get_base_url(request)
         
-        # 如果没有保存的图片，尝试加载最新的本地图片
+        # 如果没有保存的图片，尝试加载默认形象或最新的本地图片
         if not user_data.get('character', {}).get('image_url'):
             generated_images_dir = Path("generated_images")
-            if generated_images_dir.exists():
+            default_image = generated_images_dir / "default_character.jpeg"
+            
+            # 优先使用默认形象
+            if default_image.exists():
+                logger.info("Loading default character image")
+                user_config.save_character_image(
+                    image_url=str(default_image),
+                    prompt="默认治愈系小猫形象",
+                    preferences={
+                        "color": "薰衣草紫",
+                        "personality": "温柔",
+                        "appearance": "无配饰",
+                        "role": "陪伴式朋友"
+                    }
+                )
+                user_data = user_config.load_config()
+                logger.info("Default character image loaded successfully")
+            
+            # 如果没有默认形象，尝试加载最新的本地图片
+            elif generated_images_dir.exists():
                 # 获取所有图片文件
                 image_files = list(generated_images_dir.glob("character_*.jpeg"))
                 if image_files:
