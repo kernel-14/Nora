@@ -784,16 +784,16 @@ export default function App() {
       {/* Ambient noise texture overlay */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-multiply bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
 
-      {/* Main Content Area - 使用 flex 布局，为底部导航预留空间 */}
-      <main className="relative flex flex-col h-full items-center pb-28">
+      {/* Main Content Area */}
+      <main className="relative flex flex-col h-full items-center justify-between">
         
         {/* HOME VIEW */}
         {isHome && !activeActionView && (
           <>
             <TopActions onActionClick={handleActionClick} />
             
-            <div className="flex-1 flex flex-col items-center justify-center w-full relative px-4">
-               <div className="absolute top-8 opacity-60 text-sm font-light tracking-widest text-slate-500 animate-pulse delay-700">
+            <div className="flex-1 flex flex-col items-center justify-center w-full relative pt-24 pb-12">
+               <div className="absolute top-28 opacity-60 text-sm font-light tracking-widest text-slate-500 animate-pulse delay-700">
                  I'm here with you
                </div>
                
@@ -804,8 +804,8 @@ export default function App() {
                  onOpenChat={handleOpenChat}
                />
                
-               {/* Home Input Component - 固定在底部导航上方 */}
-               <div className="absolute bottom-0 left-0 right-0 pb-4">
+               {/* Home Input Component */}
+               <div className="mt-8 w-full">
                  <HomeInput onRecordComplete={loadAllData} />
                </div>
             </div>

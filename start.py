@@ -23,40 +23,32 @@ generated_images_dir.mkdir(exist_ok=True)
 # 导入 FastAPI 应用
 from app.main import app
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, HTMLResponse
-from fastapi import Request, HTTPException
+from fastapi.responses import FileResponse
+from fastapi import Request
 
 # 检查前端构建目录
 frontend_dist = Path(__file__).parent / "frontend" / "dist"
 frontend_exists = frontend_dist.exists()
 
 if frontend_exists:
-    # 挂载静态资源（CSS, JS）- 必须在路由之前
+    # 挂载静态资源（CSS, JS）
     assets_dir = frontend_dist / "assets"
     if assets_dir.exists():
         app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
         print(f"✅ 前端资源文件已挂载: {assets_dir}")
     
     print(f"✅ 前端应用已挂载: {frontend_dist}")
-    
-    # 读取 index.html 内容
-    index_html_path = frontend_dist / "index.html"
-    if index_html_path.exists():
-        with open(index_html_path, 'r', encoding='utf-8') as f:
-            index_html_content = f.read()
-    else:
-        index_html_content = None
-        print(f"⚠️ index.html 不存在: {index_html_path}")
 else:
     print(f"⚠️ 前端构建目录不存在: {frontend_dist}")
-    index_html_content = None
 
 # 重写根路径路由以服务前端
-@app.get("/", include_in_schema=False, response_class=HTMLResponse)
+@app.get("/", include_in_schema=False)
 async def serve_root():
     """服务前端应用首页"""
-    if index_html_content:
-        return HTMLResponse(content=index_html_content)
+    if frontend_exists:
+        index_file = frontend_dist / "index.html"
+        if index_file.exists():
+            return FileResponse(index_file)
     return {
         "service": "SoulMate AI Companion",
         "status": "running",
@@ -65,21 +57,21 @@ async def serve_root():
     }
 
 # 添加 catch-all 路由用于 SPA（必须放在最后）
-@app.get("/{full_path:path}", include_in_schema=False, response_class=HTMLResponse)
-async def serve_spa(full_path: str):
+@app.get("/{full_path:path}", include_in_schema=False)
+async def serve_spa(full_path: str, request: Request):
     """服务前端应用（SPA 路由支持）"""
-    # 如果是 API 路径或静态资源，返回 404
-    if (full_path.startswith("api/") or 
-        full_path.startswith("assets/") or 
-        full_path.startswith("generated_images/") or
-        full_path in ["docs", "openapi.json", "health", "redoc"]):
+    # 如果是 API 路径，跳过（让 FastAPI 处理 404）
+    if full_path.startswith("api/") or full_path == "docs" or full_path == "openapi.json" or full_path == "health":
+        from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Not found")
     
     # 返回前端 index.html
-    if index_html_content:
-        return HTMLResponse(content=index_html_content)
+    if frontend_exists:
+        index_file = frontend_dist / "index.html"
+        if index_file.exists():
+            return FileResponse(index_file)
     
-    raise HTTPException(status_code=404, detail="Frontend not found")
+    return {"error": "Frontend not found"}
 
 if __name__ == "__main__":
     import uvicorn

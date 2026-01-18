@@ -228,14 +228,14 @@ export function HomeInput({ onRecordComplete }: HomeInputProps) {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto px-6 pb-2 space-y-3 bg-gradient-to-t from-white/80 via-white/60 to-transparent backdrop-blur-sm pt-4 rounded-t-3xl">
+    <div className="w-full max-w-md mx-auto px-6 space-y-4">
       {/* Voice Recording Button */}
       <div className="flex items-center justify-center gap-4">
         <button
           onClick={isRecording ? stopRecording : startRecording}
           disabled={processing}
           className={`
-            relative p-6 rounded-full transition-all duration-300 shadow-xl
+            relative p-8 rounded-full transition-all duration-300 shadow-2xl
             ${isRecording 
               ? 'bg-gradient-to-br from-red-400 to-red-600 animate-pulse scale-110' 
               : 'bg-gradient-to-br from-purple-400 to-pink-500 hover:scale-105'
@@ -245,7 +245,7 @@ export function HomeInput({ onRecordComplete }: HomeInputProps) {
           `}
           aria-label={isRecording ? '停止录音' : '开始录音'}
         >
-          {isRecording ? <Square size={28} /> : <Mic size={28} />}
+          {isRecording ? <Square size={36} /> : <Mic size={36} />}
           
           {/* Recording indicator ring */}
           {isRecording && (
@@ -273,7 +273,7 @@ export function HomeInput({ onRecordComplete }: HomeInputProps) {
           placeholder="或者在这里输入文字..."
           disabled={processing || isRecording}
           className="
-            flex-1 px-4 py-2.5 rounded-full text-sm
+            flex-1 px-5 py-3 rounded-full
             bg-white/90 backdrop-blur-sm
             border-2 border-slate-200
             focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent
@@ -286,7 +286,7 @@ export function HomeInput({ onRecordComplete }: HomeInputProps) {
           onClick={processText}
           disabled={processing || isRecording || !textInput.trim()}
           className="
-            px-5 py-2.5 rounded-full
+            px-6 py-3 rounded-full
             bg-gradient-to-r from-purple-500 to-pink-500
             hover:from-purple-600 hover:to-pink-600
             text-white transition-all duration-200
@@ -297,9 +297,9 @@ export function HomeInput({ onRecordComplete }: HomeInputProps) {
           aria-label="发送"
         >
           {processing ? (
-            <Loader2 size={18} className="animate-spin" />
+            <Loader2 size={20} className="animate-spin" />
           ) : (
-            <Send size={18} />
+            <Send size={20} />
           )}
         </button>
       </div>
@@ -339,9 +339,10 @@ export function HomeInput({ onRecordComplete }: HomeInputProps) {
       )}
 
       {/* Hint text */}
-      <div className="text-center pb-1">
+      <div className="text-center">
         <p className="text-xs text-slate-400 leading-relaxed">
-          说出或写下你的想法、灵感、待办事项
+          说出或写下你的想法、灵感、待办事项<br />
+          我会帮你整理和记录
         </p>
       </div>
     </div>
