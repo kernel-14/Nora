@@ -48,7 +48,7 @@ class UserConfig:
             "user_id": "default_user",
             "created_at": datetime.utcnow().isoformat() + "Z",
             "character": {
-                "image_url": "generated_images/default_character.jpeg",
+                "image_url": "",  # 空字符串，前端会显示占位符
                 "prompt": "默认治愈系小猫形象",
                 "revised_prompt": "一只薰衣草紫色的温柔猫咪，治愈系风格，温暖的陪伴者",
                 "preferences": {

@@ -322,7 +322,7 @@ class StorageService:
         """获取默认的用户配置"""
         return {
             "character": {
-                "image_url": "generated_images/character_薰衣草紫_温柔_20260117_183825.jpeg",
+                "image_url": "",  # 空字符串，前端会显示占位符
                 "prompt": "默认形象：薰衣草紫色温柔猫咪",
                 "preferences": {
                     "color": "薰衣草紫",
