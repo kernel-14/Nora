@@ -16,36 +16,38 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, onTabChange })
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[150] px-6 pb-6 pt-2">
-      <nav className="relative bg-white/70 backdrop-blur-xl shadow-lg shadow-purple-100/50 rounded-3xl flex justify-between items-center px-6 py-4 max-w-md mx-auto ring-1 ring-white/50">
-        {navItems.map((item) => {
-          const isActive = currentTab === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => onTabChange(item.id)}
-              className="relative flex flex-col items-center justify-center gap-1 w-12 h-12 transition-all duration-300"
-            >
-              <div 
-                className={`
-                  absolute inset-0 rounded-full transition-all duration-500 
-                  ${isActive ? 'bg-gradient-to-br from-pink-100 to-purple-100 opacity-100 scale-100' : 'opacity-0 scale-75'}
-                `}
-              />
-              <item.icon 
-                size={22} 
-                strokeWidth={isActive ? 2 : 1.5}
-                className={`relative z-10 transition-colors duration-300 ${isActive ? 'text-purple-600' : 'text-slate-400'}`} 
-              />
-              <span 
-                className={`relative z-10 text-[10px] font-medium transition-colors duration-300 ${isActive ? 'text-purple-700' : 'text-slate-400'}`}
+    <div className="fixed bottom-0 left-0 right-0 z-[150] px-4 pb-safe">
+      <div className="pb-4 pt-2">
+        <nav className="relative bg-white/80 backdrop-blur-xl shadow-lg shadow-purple-100/50 rounded-3xl flex justify-between items-center px-4 py-3 max-w-md mx-auto ring-1 ring-white/50">
+          {navItems.map((item) => {
+            const isActive = currentTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onTabChange(item.id)}
+                className="relative flex flex-col items-center justify-center gap-0.5 w-16 h-14 transition-all duration-300"
               >
-                {item.label}
-              </span>
-            </button>
-          );
-        })}
-      </nav>
+                <div 
+                  className={`
+                    absolute inset-0 rounded-full transition-all duration-500 
+                    ${isActive ? 'bg-gradient-to-br from-pink-100 to-purple-100 opacity-100 scale-100' : 'opacity-0 scale-75'}
+                  `}
+                />
+                <item.icon 
+                  size={20} 
+                  strokeWidth={isActive ? 2 : 1.5}
+                  className={`relative z-10 transition-colors duration-300 ${isActive ? 'text-purple-600' : 'text-slate-400'}`} 
+                />
+                <span 
+                  className={`relative z-10 text-[10px] font-medium transition-colors duration-300 ${isActive ? 'text-purple-700' : 'text-slate-400'}`}
+                >
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
+        </nav>
+      </div>
     </div>
   );
 };
