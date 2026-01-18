@@ -16,11 +16,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 复制应用代码
 COPY app/ ./app/
 COPY data/ ./data/
-COPY generated_images/ ./generated_images/
 COPY frontend/dist/ ./frontend/dist/
 
-# 创建启动脚本
+# 复制启动脚本
 COPY start.py .
+
+# 创建必要的目录
+RUN mkdir -p generated_images logs
 
 # 暴露端口
 EXPOSE 7860
