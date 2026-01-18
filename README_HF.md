@@ -4,7 +4,7 @@ emoji: 🌟
 colorFrom: purple
 colorTo: pink
 sdk: gradio
-sdk_version: "5.9.1"
+sdk_version: "4.44.0"
 app_file: app.py
 pinned: false
 license: mit
@@ -106,6 +106,25 @@ python_version: "3.11"
 - 所有数据存储在 Hugging Face Space 的临时存储中
 - 不会上传到外部服务器
 - API 密钥安全存储在环境变量中
+
+## 🐛 故障排除
+
+### ImportError: cannot import name 'HfFolder'
+
+如果遇到此错误，说明 `gradio` 和 `huggingface_hub` 版本不兼容。
+
+**解决方法：**
+1. 确保 `requirements_hf.txt` 中的版本为：
+   - `huggingface-hub==0.23.5`
+   - `gradio==4.44.0`
+2. 在 Space Settings 中点击 "Factory reboot" 强制重建
+3. 或者在 README_HF.md 的 frontmatter 中确认 `sdk_version: "4.44.0"`
+
+### 应用无法启动
+
+1. 检查 Space Logs 查看详细错误信息
+2. 确认已配置 `ZHIPU_API_KEY` 环境变量
+3. 检查 `data/` 和 `generated_images/` 目录是否存在
 
 ## 📄 许可证
 

@@ -1,8 +1,9 @@
 # Hugging Face Spaces Requirements
-# Using newer versions that are compatible with each other
+# Using tested stable versions that work together
 
-# Gradio 5.x is compatible with newer huggingface_hub versions
-gradio==5.9.1
+# Critical: These versions MUST be installed together
+huggingface-hub==0.23.5
+gradio==4.44.0
 
 # Core dependencies (compatible with Python 3.11+)
 fastapi==0.115.0
