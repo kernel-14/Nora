@@ -113,9 +113,9 @@ def get_base_url(request: Request) -> str:
     return f"{scheme}://{host}"
 
 
-@app.get("/")
+@app.get("/api/status")
 async def root():
-    """Root endpoint - health check."""
+    """API status endpoint."""
     return {
         "service": "Voice Text Processor",
         "status": "running",
