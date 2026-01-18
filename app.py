@@ -131,10 +131,7 @@ with gr.Blocks(
     """)
 
 # 挂载 FastAPI 到 Gradio
-demo = gr.mount_gradio_app(fastapi_app, demo, path="/gradio")
-
-# 导出应用（Hugging Face Spaces 会自动使用）
-app = demo
+app = gr.mount_gradio_app(fastapi_app, demo, path="/gradio")
 
 # 如果直接运行此文件
 if __name__ == "__main__":
