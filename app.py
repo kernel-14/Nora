@@ -25,12 +25,28 @@ generated_images_dir.mkdir(exist_ok=True)
 # 导入 FastAPI 应用
 from app.main import app as fastapi_app
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 # 挂载前端静态文件
 frontend_dist = Path(__file__).parent / "frontend" / "dist"
 if frontend_dist.exists():
-    fastapi_app.mount("/", StaticFiles(directory=str(frontend_dist), html=True), name="frontend")
-    print(f"✅ 前端静态文件已挂载: {frontend_dist}")
+    # 先挂载静态资源（CSS, JS）
+    assets_dir = frontend_dist / "assets"
+    if assets_dir.exists():
+        fastapi_app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+        print(f"✅ 前端资源文件已挂载: {assets_dir}")
+    
+    # 添加根路径和所有未匹配路径返回 index.html（SPA 路由支持）
+    @fastapi_app.get("/app")
+    @fastapi_app.get("/app/{full_path:path}")
+    async def serve_frontend(full_path: str = ""):
+        """服务前端应用"""
+        index_file = frontend_dist / "index.html"
+        if index_file.exists():
+            return FileResponse(index_file)
+        return {"error": "Frontend not found"}
+    
+    print(f"✅ 前端应用已挂载到 /app 路径: {frontend_dist}")
 else:
     print(f"⚠️ 前端构建目录不存在: {frontend_dist}")
     print("请先构建前端: cd frontend && npm install && npm run build")
@@ -60,8 +76,11 @@ with gr.Blocks(
     
     ### 🚀 开始使用
     
-    应用已启动！请访问下方链接使用完整功能：
-    """)
+    **🎯 前端应用地址：** [点击这里访问完整应用 →](/app)
+    
+    **📚 API 文档：** [FastAPI Swagger Docs →](/docs)
+    
+    ---
     
     gr.Markdown("""
     ### 📖 使用说明

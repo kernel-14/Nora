@@ -6,7 +6,6 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -52,3 +51,8 @@ htmlcov/
 # OS
 .DS_Store
 Thumbs.db
+
+# Frontend (开发时忽略，但部署时需要 dist)
+frontend/node_modules/
+# 注意：frontend/dist/ 不要忽略，部署需要它！
+
