@@ -170,8 +170,8 @@ class StorageService:
                     "todos": [
                         {
                             "task": "定期和朋友联系",
-                            "time": null,
-                            "location": null,
+                            "time": None,
+                            "location": None,
                             "status": "pending"
                         }
                     ]
@@ -312,8 +312,8 @@ class StorageService:
                 "record_id": "welcome-3",
                 "timestamp": (now - timedelta(days=1, hours=3)).isoformat() + "Z",
                 "task": "定期和朋友联系",
-                "time": null,
-                "location": null,
+                "time": None,
+                "location": None,
                 "status": "pending"
             }
         ]
