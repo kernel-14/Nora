@@ -19,6 +19,9 @@ wheels/
 .installed.cfg
 *.egg
 
+# ppt
+*.pptx
+
 # Virtual environments
 venv/
 env/
